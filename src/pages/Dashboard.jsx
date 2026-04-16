@@ -5,6 +5,8 @@ import { base44 } from '@/api/base44Client';
 import { motion, AnimatePresence } from 'framer-motion';
 import MicButton from '@/components/MicButton';
 import AnalyzingLoader from '@/components/AnalyzingLoader';
+import MicPermissionCard from '@/components/MicPermissionCard';
+import RecentMoments from '@/components/RecentMoments';
 import useSpeechInput from '@/hooks/useSpeechInput';
 
 const SYSTEM_PROMPT = `Eres 'Naran', un asistente conductual para parejas basado en el Instituto Gottman, Terapia Cognitivo-Conductual (TCC) y Comunicación No Violenta (CNV).
@@ -60,12 +62,17 @@ export default function Dashboard() {
   const [user, setUser] = useState(null);
   const [text, setText] = useState('');
   const [analyzing, setAnalyzing] = useState(false);
+  const [logs, setLogs] = useState([]);
 
   const { listening, transcript, error, startListening, stopListening, resetTranscript, browserSupported } = useSpeechInput();
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
   }, []);
+
+  useEffect(() => {
+    base44.entities.ConflictLog.list('-created_date', 3).then(setLogs).catch(() => {});
+  }, [analyzing]); // refetch after analyzing (when user returns)
 
   // Keep textarea in sync with live transcript
   useEffect(() => {
@@ -74,6 +81,7 @@ export default function Dashboard() {
 
   const handleMicClick = async () => {
     if (listening) {
+      if (navigator.vibrate) navigator.vibrate(5);
       stopListening();
       const finalText = transcript.trim();
       if (finalText) {
@@ -81,6 +89,7 @@ export default function Dashboard() {
         await handleAnalyze(finalText);
       }
     } else {
+      if (navigator.vibrate) navigator.vibrate(10);
       setText('');
       resetTranscript();
       startListening();
@@ -171,9 +180,11 @@ export default function Dashboard() {
               className="w-full resize-none rounded-2xl border border-border bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all"
             />
 
-            {/* Error message */}
+            {/* Error message / permission card */}
             {error && (
-              <p className="text-xs px-1" style={{ color: '#E07A5F' }}>{error}</p>
+              error.includes('permiso') || error.includes('not-allowed')
+                ? <MicPermissionCard />
+                : <p className="text-xs px-1" style={{ color: '#E07A5F' }}>{error}</p>
             )}
 
             {text.trim() && !listening && (
@@ -188,6 +199,9 @@ export default function Dashboard() {
               </motion.button>
             )}
           </div>
+
+          {/* Recent moments */}
+          <RecentMoments logs={logs} />
         </motion.div>
       )}
     </AnimatePresence>

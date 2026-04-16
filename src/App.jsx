@@ -10,6 +10,7 @@ import MobileLayout from '@/components/MobileLayout';
 import Welcome from '@/pages/Welcome';
 import Dashboard from '@/pages/Dashboard';
 import Reframe from '@/pages/Reframe';
+import LogDetail from '@/pages/LogDetail';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -35,6 +36,7 @@ const AuthenticatedApp = () => {
         <Route path="/login" element={<Welcome />} />
         <Route path="/app" element={<Dashboard />} />
         <Route path="/reframe" element={<Reframe />} />
+        <Route path="/log/:id" element={<LogDetail />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>
