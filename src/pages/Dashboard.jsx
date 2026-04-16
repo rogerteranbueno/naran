@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LogOut } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
@@ -10,9 +10,9 @@ import useSpeechInput from '@/hooks/useSpeechInput';
 async function analyzeConflict(text) {
   await new Promise(r => setTimeout(r, 2000));
   return {
+    original_text: text,
     cognitive_note: "Estás generalizando ('siempre ignoras')",
     reframe_message: "Cuando hablo de temas importantes para mí y siento que no hay espacio, me siento invisible. Necesito que busquemos un momento para conectar sin distracciones.",
-    original_text: text,
   };
 }
 
@@ -21,37 +21,36 @@ export default function Dashboard() {
   const [user, setUser] = useState(null);
   const [text, setText] = useState('');
   const [analyzing, setAnalyzing] = useState(false);
-  const prevListening = useRef(false);
 
-  const { listening, transcript, startListening, stopListening, resetTranscript, browserSupported } = useSpeechInput();
+  const { listening, transcript, error, startListening, stopListening, resetTranscript, browserSupported } = useSpeechInput();
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
   }, []);
 
-  // When voice recording stops and we have transcript, auto-analyze
+  // Keep textarea in sync with live transcript
   useEffect(() => {
-    if (prevListening.current && !listening && transcript) {
-      setText(transcript);
-      handleAnalyze(transcript);
-      resetTranscript();
-    }
-    prevListening.current = listening;
-  }, [listening]);
+    if (listening) setText(transcript);
+  }, [transcript, listening]);
 
-  const handleMicClick = () => {
+  const handleMicClick = async () => {
     if (listening) {
       stopListening();
+      const finalText = transcript.trim();
+      if (finalText) {
+        resetTranscript();
+        await handleAnalyze(finalText);
+      }
     } else {
-      resetTranscript();
       setText('');
+      resetTranscript();
       startListening();
     }
   };
 
   const handleAnalyze = async (inputText) => {
-    const content = inputText || text;
-    if (!content.trim()) return;
+    const content = (inputText ?? text).trim();
+    if (!content) return;
     setAnalyzing(true);
     const result = await analyzeConflict(content);
     navigate('/reframe', { state: result });
@@ -72,6 +71,7 @@ export default function Dashboard() {
         </motion.div>
       ) : (
         <motion.div key="main" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1 flex flex-col px-6 py-8">
+
           {/* Header */}
           <div className="flex items-center justify-between mb-8">
             <div>
@@ -95,42 +95,55 @@ export default function Dashboard() {
           </p>
 
           {/* Mic button */}
-          <div className="flex flex-col items-center gap-4 mb-8">
+          <div className="flex flex-col items-center gap-3 mb-8">
             <MicButton isListening={listening} onClick={handleMicClick} disabled={!browserSupported} />
+
+            {/* Listening indicator */}
             {listening && (
-              <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-sm text-primary font-medium">
-                Escuchando…
-              </motion.p>
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-1.5">
+                <span className="text-sm text-primary font-medium">Escuchando</span>
+                <span className="flex gap-0.5">
+                  {[0, 0.2, 0.4].map((delay, i) => (
+                    <motion.span
+                      key={i}
+                      className="w-1 h-1 rounded-full bg-primary inline-block"
+                      animate={{ opacity: [0.3, 1, 0.3] }}
+                      transition={{ duration: 1.2, repeat: Infinity, delay }}
+                    />
+                  ))}
+                </span>
+              </motion.div>
             )}
+
             {!browserSupported && (
               <p className="text-xs text-center text-muted-foreground px-4">
-                Naran necesita acceso al micrófono para escucharte. Puedes escribir tu mensaje abajo.
+                Escribe tu mensaje abajo para continuar.
               </p>
             )}
           </div>
-
-          {/* Live transcript preview */}
-          {listening && transcript && (
-            <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-sm text-center text-muted-foreground italic px-4 mb-4">
-              "{transcript}"
-            </motion.p>
-          )}
 
           {/* Text input */}
           <div className="flex flex-col gap-3">
             <textarea
               value={text}
-              onChange={e => setText(e.target.value)}
+              onChange={e => !listening && setText(e.target.value)}
               placeholder="O escribe aquí lo que pasó..."
               rows={4}
               className="w-full resize-none rounded-2xl border border-border bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all"
             />
+
+            {/* Error message */}
+            {error && (
+              <p className="text-xs px-1" style={{ color: '#E07A5F' }}>{error}</p>
+            )}
+
             {text.trim() && !listening && (
               <motion.button
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
                 onClick={() => handleAnalyze()}
-                className="w-full h-12 rounded-2xl bg-primary text-white text-sm font-medium shadow-md shadow-primary/20 active:scale-95 transition-transform"
+                className="w-full h-12 rounded-2xl text-white text-sm font-medium shadow-md active:scale-95 transition-transform"
+                style={{ background: '#E07A5F' }}
               >
                 Analizar
               </motion.button>
