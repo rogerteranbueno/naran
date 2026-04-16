@@ -12,15 +12,14 @@ function getEmoji(cognitiveNote = '') {
 }
 
 function timeAgo(dateStr) {
-  const now = new Date();
-  const date = new Date(dateStr);
-  const diffMs = now - date;
+  const diffMs = Date.now() - new Date(dateStr).getTime();
+  if (diffMs < 0) return 'Ahora';
   const diffMins = Math.floor(diffMs / 60000);
-  const diffHours = Math.floor(diffMins / 60);
-  const diffDays = Math.floor(diffHours / 24);
-
+  if (diffMins < 1) return 'Ahora';
   if (diffMins < 60) return `Hace ${diffMins} min`;
+  const diffHours = Math.floor(diffMins / 60);
   if (diffHours < 24) return `Hace ${diffHours} hora${diffHours > 1 ? 's' : ''}`;
+  const diffDays = Math.floor(diffHours / 24);
   if (diffDays === 1) return 'Ayer';
   return `Hace ${diffDays} días`;
 }
@@ -52,9 +51,12 @@ export default function RecentMoments({ logs }) {
         </div>
       ) : (
         <div className="flex flex-col divide-y divide-border rounded-2xl border border-border overflow-hidden bg-white">
-          {logs.map((log) => (
-            <button
+          {logs.map((log, i) => (
+            <motion.button
               key={log.id}
+              initial={{ opacity: 0, y: 5 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.07, duration: 0.3 }}
               onClick={() => navigate(`/log/${log.id}`, { state: log })}
               className="flex items-center gap-3 px-4 py-3 text-left hover:bg-secondary/40 transition-colors"
             >
@@ -63,7 +65,7 @@ export default function RecentMoments({ logs }) {
                 <p className="text-sm text-foreground truncate">{snippet(log.original_text)}</p>
                 <p className="text-xs text-muted-foreground mt-0.5">{timeAgo(log.created_date)}</p>
               </div>
-            </button>
+            </motion.button>
           ))}
         </div>
       )}

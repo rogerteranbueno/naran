@@ -7,6 +7,7 @@ import MicButton from '@/components/MicButton';
 import AnalyzingLoader from '@/components/AnalyzingLoader';
 import MicPermissionCard from '@/components/MicPermissionCard';
 import RecentMoments from '@/components/RecentMoments';
+import Onboarding from '@/components/Onboarding';
 import useSpeechInput from '@/hooks/useSpeechInput';
 
 const SYSTEM_PROMPT = `Eres 'Naran', un asistente conductual para parejas basado en el Instituto Gottman, Terapia Cognitivo-Conductual (TCC) y Comunicación No Violenta (CNV).
@@ -27,10 +28,16 @@ DETECCIÓN DE PATRONES:
 
 GUARDRAIL: Si el texto contiene lenguaje muy agresivo o insultos directos, responde con cognitive_note: "Lenguaje de alta intensidad detectado." y reframe_message: "Necesito un momento para calmarme. Hablemos más tarde."`;
 
+// Solo bloquea insultos DIRIGIDOS a la pareja, nunca expresiones de vulnerabilidad propia
+const DIRECTED_INSULT_PATTERN = /\b(eres|es|sos)\s+(un|una)\s+(idiota|inútil|estúpid[oa]|imbécil|puta|bastard[oa]|maldita?)/i;
+const HIGH_AGGRESSION_WORDS = ["puta madre", "hijo de puta", "me cago en"];
+
 async function analyzeConflict(text) {
-  const forbiddenWords = ["idiota", "inútil", "estúpido", "puta", "mierda", "imbécil"];
-  const containsForbidden = forbiddenWords.some(w => text.toLowerCase().includes(w));
-  if (containsForbidden) {
+  const lower = text.toLowerCase();
+  const isDirectedInsult = DIRECTED_INSULT_PATTERN.test(text);
+  const isHighAggression = HIGH_AGGRESSION_WORDS.some(w => lower.includes(w));
+
+  if (isDirectedInsult || isHighAggression) {
     return {
       original_text: text,
       cognitive_note: "Lenguaje de alta intensidad detectado.",
@@ -63,6 +70,7 @@ export default function Dashboard() {
   const [text, setText] = useState('');
   const [analyzing, setAnalyzing] = useState(false);
   const [logs, setLogs] = useState([]);
+  const [showOnboarding, setShowOnboarding] = useState(!localStorage.getItem('naran_onboarded'));
 
   const { listening, transcript, error, startListening, stopListening, resetTranscript, browserSupported } = useSpeechInput();
 
@@ -110,6 +118,10 @@ export default function Dashboard() {
     if (h < 18) return 'Buenas tardes';
     return 'Buenas noches';
   };
+
+  if (showOnboarding) {
+    return <Onboarding onDone={() => setShowOnboarding(false)} />;
+  }
 
   return (
     <AnimatePresence mode="wait">
@@ -175,7 +187,7 @@ export default function Dashboard() {
             <textarea
               value={text}
               onChange={e => !listening && setText(e.target.value)}
-              placeholder="O escribe aquí lo que pasó..."
+              placeholder="Escribe aquí lo que pasó..."
               rows={4}
               className="w-full resize-none rounded-2xl border border-border bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all"
             />

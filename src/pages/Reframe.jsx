@@ -24,7 +24,7 @@ export default function Reframe() {
 
   const originalText = state?.original_text || '';
   const cognitiveNote = state?.cognitive_note || '';
-  const reframeMessage = state?.reframe_message || '';
+  const [editedMessage, setEditedMessage] = useState(state?.reframe_message || '');
 
   const showToast = (msg) => {
     setToast(msg);
@@ -32,34 +32,34 @@ export default function Reframe() {
   };
 
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(reframeMessage);
+    await navigator.clipboard.writeText(editedMessage);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
   const handleSend = async () => {
     setSaving(true);
-    await navigator.clipboard.writeText(reframeMessage).catch(() => {});
+    await navigator.clipboard.writeText(editedMessage).catch(() => {});
     try {
-      await saveConflictLog({ original_text: originalText, cognitive_note: cognitiveNote, reframe_message: reframeMessage, action_taken: 'sent' });
+      await saveConflictLog({ original_text: originalText, cognitive_note: cognitiveNote, reframe_message: editedMessage, action_taken: 'sent' });
     } catch {
       showToast('No se pudo guardar. Revisa tu conexión.');
       setSaving(false);
       return;
     }
     if (navigator.share) {
-      navigator.share({ text: reframeMessage }).catch(() => {});
+      navigator.share({ text: editedMessage }).catch(() => {});
     } else {
-      window.open(`whatsapp://send?text=${encodeURIComponent(reframeMessage)}`);
+      window.open(`whatsapp://send?text=${encodeURIComponent(editedMessage)}`);
     }
-    showToast('Mensaje copiado. Pégalo en tu chat.');
+    showToast('¡Copiado! Pégalo en tu chat.');
     setSaving(false);
   };
 
   const handleSave = async () => {
     setSaving(true);
     try {
-      await saveConflictLog({ original_text: originalText, cognitive_note: cognitiveNote, reframe_message: reframeMessage, action_taken: 'saved' });
+      await saveConflictLog({ original_text: originalText, cognitive_note: cognitiveNote, reframe_message: editedMessage, action_taken: 'saved' });
     } catch {
       showToast('No se pudo guardar. Revisa tu conexión.');
       setSaving(false);
@@ -118,7 +118,7 @@ export default function Reframe() {
         </motion.div>
       )}
 
-      {/* Reframe message */}
+      {/* Reframe message — editable */}
       <motion.div
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
@@ -126,16 +126,21 @@ export default function Reframe() {
         className="mb-8 flex-1"
       >
         <p className="text-sm font-semibold text-foreground mb-3">Prueba decir esto:</p>
-        <div className="relative rounded-2xl border border-border bg-white px-5 py-5 shadow-sm">
+        <div className="relative rounded-2xl border border-border bg-white shadow-sm overflow-hidden">
           <button
             onClick={handleCopy}
-            className="absolute top-3 right-3 w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+            className="absolute top-3 right-3 w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors z-10"
           >
             {copied ? <Check className="w-4 h-4 text-primary" /> : <Copy className="w-4 h-4" />}
           </button>
-          <p className="text-lg leading-relaxed pr-8" style={{ color: '#2C2C2C' }}>
-            {reframeMessage}
-          </p>
+          <textarea
+            value={editedMessage}
+            onChange={e => setEditedMessage(e.target.value)}
+            rows={4}
+            className="w-full resize-none px-5 pt-5 pb-4 pr-12 text-lg leading-relaxed bg-transparent focus:outline-none"
+            style={{ color: '#2C2C2C' }}
+          />
+          <p className="px-5 pb-3 text-xs text-muted-foreground/50">Puedes editar el mensaje antes de enviarlo</p>
         </div>
       </motion.div>
 
@@ -149,10 +154,15 @@ export default function Reframe() {
         <button
           onClick={handleSend}
           disabled={saving}
-          className="w-full h-14 rounded-2xl text-white text-base font-medium flex items-center justify-center gap-2 shadow-lg transition-opacity disabled:opacity-60"
+          className="w-full h-14 rounded-2xl text-white text-base font-medium flex items-center justify-center gap-2 shadow-lg transition-all disabled:opacity-60"
           style={{ background: '#E07A5F', boxShadow: '0 8px 24px rgba(224,122,95,0.25)' }}
         >
-          {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Enviar mensaje'}
+          {saving
+            ? <Loader2 className="w-5 h-5 animate-spin" />
+            : copied
+              ? <><Check className="w-5 h-5" /> ¡Copiado!</>
+              : 'Enviar mensaje'
+          }
         </button>
         <button
           onClick={handleSave}
