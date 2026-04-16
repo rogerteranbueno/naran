@@ -7,12 +7,51 @@ import MicButton from '@/components/MicButton';
 import AnalyzingLoader from '@/components/AnalyzingLoader';
 import useSpeechInput from '@/hooks/useSpeechInput';
 
+const SYSTEM_PROMPT = `Eres 'Naran', un asistente conductual para parejas basado en el Instituto Gottman, Terapia Cognitivo-Conductual (TCC) y Comunicación No Violenta (CNV).
+
+Tu tarea es intervenir en los primeros 60 segundos de un conflicto interno. El usuario está emocionalmente activado.
+
+REGLAS DE ORO (NUNCA ROMPER):
+1. NO validar suposiciones dañinas. Reformula el sentimiento, no el insulto.
+2. NO tomar partido. Tu lealtad es a la RELACIÓN, no al usuario.
+3. SIEMPRE usar la estructura: "Cuando [HECHO ESPECÍFICO], me siento [EMOCIÓN VULNERABLE], necesito [PETICIÓN POSITIVA Y ACCIONABLE]."
+4. SER BREVE en el reframe_message. Menos de 200 caracteres.
+
+DETECCIÓN DE PATRONES:
+- Crítica ("Siempre/Nunca") -> Usa "Inicio Suave" (Gentle Start-Up).
+- Desprecio ("Ridículo/Patético") -> Traduce a una necesidad de Aprecio/Respeto.
+- Actitud Defensiva ("No es mi culpa, es que tú...") -> Ayuda a tomar un 5% de responsabilidad.
+- Actitud Evasiva (input vago o monosílabos de enfado) -> Ofrece una frase de pausa segura.
+
+GUARDRAIL: Si el texto contiene lenguaje muy agresivo o insultos directos, responde con cognitive_note: "Lenguaje de alta intensidad detectado." y reframe_message: "Necesito un momento para calmarme. Hablemos más tarde."`;
+
 async function analyzeConflict(text) {
-  await new Promise(r => setTimeout(r, 2000));
+  const forbiddenWords = ["idiota", "inútil", "estúpido", "puta", "mierda", "imbécil"];
+  const containsForbidden = forbiddenWords.some(w => text.toLowerCase().includes(w));
+  if (containsForbidden) {
+    return {
+      original_text: text,
+      cognitive_note: "Lenguaje de alta intensidad detectado.",
+      reframe_message: "Necesito un momento para calmarme. Hablemos más tarde.",
+    };
+  }
+
+  const result = await base44.integrations.Core.InvokeLLM({
+    prompt: `${SYSTEM_PROMPT}\n\nTexto del usuario: "${text}"`,
+    response_json_schema: {
+      type: "object",
+      properties: {
+        cognitive_note: { type: "string" },
+        reframe_message: { type: "string" },
+      },
+      required: ["cognitive_note", "reframe_message"],
+    },
+  });
+
   return {
     original_text: text,
-    cognitive_note: "Estás generalizando ('siempre ignoras')",
-    reframe_message: "Cuando hablo de temas importantes para mí y siento que no hay espacio, me siento invisible. Necesito que busquemos un momento para conectar sin distracciones.",
+    cognitive_note: result.cognitive_note,
+    reframe_message: result.reframe_message,
   };
 }
 
