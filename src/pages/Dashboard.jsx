@@ -3,9 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { LogOut } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { motion, AnimatePresence } from 'framer-motion';
-import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 import MicButton from '@/components/MicButton';
 import AnalyzingLoader from '@/components/AnalyzingLoader';
+import useSpeechInput from '@/hooks/useSpeechInput';
 
 async function analyzeConflict(text) {
   await new Promise(r => setTimeout(r, 2000));
@@ -21,15 +21,9 @@ export default function Dashboard() {
   const [user, setUser] = useState(null);
   const [text, setText] = useState('');
   const [analyzing, setAnalyzing] = useState(false);
-  const textareaRef = useRef(null);
+  const prevListening = useRef(false);
 
-  const {
-    transcript,
-    listening,
-    resetTranscript,
-    browserSupportsSpeechRecognition,
-    isMicrophoneAvailable,
-  } = useSpeechRecognition();
+  const { listening, transcript, startListening, stopListening, resetTranscript, browserSupported } = useSpeechInput();
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
@@ -37,20 +31,21 @@ export default function Dashboard() {
 
   // When voice recording stops and we have transcript, auto-analyze
   useEffect(() => {
-    if (!listening && transcript) {
+    if (prevListening.current && !listening && transcript) {
       setText(transcript);
       handleAnalyze(transcript);
       resetTranscript();
     }
+    prevListening.current = listening;
   }, [listening]);
 
   const handleMicClick = () => {
     if (listening) {
-      SpeechRecognition.stopListening();
+      stopListening();
     } else {
       resetTranscript();
       setText('');
-      SpeechRecognition.startListening({ language: 'es-ES', continuous: false });
+      startListening();
     }
   };
 
@@ -72,23 +67,11 @@ export default function Dashboard() {
   return (
     <AnimatePresence mode="wait">
       {analyzing ? (
-        <motion.div
-          key="loader"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="flex-1 flex flex-col"
-        >
+        <motion.div key="loader" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1 flex flex-col">
           <AnalyzingLoader />
         </motion.div>
       ) : (
-        <motion.div
-          key="main"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="flex-1 flex flex-col px-6 py-8"
-        >
+        <motion.div key="main" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1 flex flex-col px-6 py-8">
           {/* Header */}
           <div className="flex items-center justify-between mb-8">
             <div>
@@ -113,26 +96,13 @@ export default function Dashboard() {
 
           {/* Mic button */}
           <div className="flex flex-col items-center gap-4 mb-8">
-            <MicButton
-              isListening={listening}
-              onClick={handleMicClick}
-              disabled={!browserSupportsSpeechRecognition || !isMicrophoneAvailable}
-            />
+            <MicButton isListening={listening} onClick={handleMicClick} disabled={!browserSupported} />
             {listening && (
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="text-sm text-primary font-medium"
-              >
+              <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-sm text-primary font-medium">
                 Escuchando…
               </motion.p>
             )}
-            {!browserSupportsSpeechRecognition && (
-              <p className="text-xs text-center text-muted-foreground px-4">
-                Naran necesita acceso al micrófono para escucharte. Puedes escribir tu mensaje abajo.
-              </p>
-            )}
-            {browserSupportsSpeechRecognition && !isMicrophoneAvailable && (
+            {!browserSupported && (
               <p className="text-xs text-center text-muted-foreground px-4">
                 Naran necesita acceso al micrófono para escucharte. Puedes escribir tu mensaje abajo.
               </p>
@@ -141,11 +111,7 @@ export default function Dashboard() {
 
           {/* Live transcript preview */}
           {listening && transcript && (
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="text-sm text-center text-muted-foreground italic px-4 mb-4"
-            >
+            <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-sm text-center text-muted-foreground italic px-4 mb-4">
               "{transcript}"
             </motion.p>
           )}
@@ -153,7 +119,6 @@ export default function Dashboard() {
           {/* Text input */}
           <div className="flex flex-col gap-3">
             <textarea
-              ref={textareaRef}
               value={text}
               onChange={e => setText(e.target.value)}
               placeholder="O escribe aquí lo que pasó..."
