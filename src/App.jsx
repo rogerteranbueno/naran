@@ -9,6 +9,7 @@ import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import MobileLayout from '@/components/MobileLayout';
 import Welcome from '@/pages/Welcome';
 import Dashboard from '@/pages/Dashboard';
+import Reframe from '@/pages/Reframe';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -33,6 +34,7 @@ const AuthenticatedApp = () => {
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<Welcome />} />
         <Route path="/app" element={<Dashboard />} />
+        <Route path="/reframe" element={<Reframe />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>

@@ -1,89 +1,178 @@
-import React, { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Heart, Flame, MessageCircle, LogOut } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { LogOut } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
+import MicButton from '@/components/MicButton';
+import AnalyzingLoader from '@/components/AnalyzingLoader';
+
+async function analyzeConflict(text) {
+  await new Promise(r => setTimeout(r, 2000));
+  return {
+    cognitive_note: "Estás generalizando ('siempre ignoras')",
+    reframe_message: "Cuando hablo de temas importantes para mí y siento que no hay espacio, me siento invisible. Necesito que busquemos un momento para conectar sin distracciones.",
+    original_text: text,
+  };
+}
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
+  const [text, setText] = useState('');
+  const [analyzing, setAnalyzing] = useState(false);
+  const textareaRef = useRef(null);
+
+  const {
+    transcript,
+    listening,
+    resetTranscript,
+    browserSupportsSpeechRecognition,
+    isMicrophoneAvailable,
+  } = useSpeechRecognition();
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
   }, []);
 
-  const handleLogout = () => {
-    base44.auth.logout('/login');
+  // When voice recording stops and we have transcript, auto-analyze
+  useEffect(() => {
+    if (!listening && transcript) {
+      setText(transcript);
+      handleAnalyze(transcript);
+      resetTranscript();
+    }
+  }, [listening]);
+
+  const handleMicClick = () => {
+    if (listening) {
+      SpeechRecognition.stopListening();
+    } else {
+      resetTranscript();
+      setText('');
+      SpeechRecognition.startListening({ language: 'es-ES', continuous: false });
+    }
+  };
+
+  const handleAnalyze = async (inputText) => {
+    const content = inputText || text;
+    if (!content.trim()) return;
+    setAnalyzing(true);
+    const result = await analyzeConflict(content);
+    navigate('/reframe', { state: result });
   };
 
   const greeting = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) return 'Buenos días';
-    if (hour < 18) return 'Buenas tardes';
+    const h = new Date().getHours();
+    if (h < 12) return 'Buenos días';
+    if (h < 18) return 'Buenas tardes';
     return 'Buenas noches';
   };
 
   return (
-    <div className="flex-1 flex flex-col px-6 py-8">
-      {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-        className="flex items-center justify-between mb-10"
-      >
-        <div>
-          <p className="text-sm text-muted-foreground">{greeting()}</p>
-          <h1 className="text-2xl font-semibold tracking-tight">
-            {user?.full_name?.split(' ')[0] || 'Hola'}
-          </h1>
-        </div>
-        <button
-          onClick={handleLogout}
-          className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+    <AnimatePresence mode="wait">
+      {analyzing ? (
+        <motion.div
+          key="loader"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="flex-1 flex flex-col"
         >
-          <LogOut className="w-4 h-4" />
-        </button>
-      </motion.div>
-
-      {/* Main CTA */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.5, delay: 0.15 }}
-        className="flex-1 flex flex-col items-center justify-center"
-      >
-        <div className="text-center mb-10">
-          <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
-            <Flame className="w-12 h-12 text-primary" strokeWidth={1.5} />
+          <AnalyzingLoader />
+        </motion.div>
+      ) : (
+        <motion.div
+          key="main"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="flex-1 flex flex-col px-6 py-8"
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <p className="text-sm text-muted-foreground">{greeting()}</p>
+              <h1 className="text-2xl font-semibold tracking-tight">
+                {user?.full_name?.split(' ')[0] || 'Hola'}
+              </h1>
+            </div>
+            <button
+              onClick={() => base44.auth.logout('/login')}
+              className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
           </div>
-          <h2 className="text-xl font-medium text-foreground mb-2">
-            ¿Momento difícil?
-          </h2>
-          <p className="text-sm text-muted-foreground max-w-[240px] mx-auto leading-relaxed">
-            Escribe lo que sientes. Naran te ayudará a transformarlo en un mensaje que conecte.
+
+          {/* Subtitle */}
+          <p className="text-center text-sm text-muted-foreground leading-relaxed mb-10 px-4">
+            ¿Momento difícil? Escribe lo que sientes.<br />
+            Naran te ayudará a transformarlo en un mensaje que conecte.
           </p>
-        </div>
 
-        <Button
-          className="w-full max-w-[280px] h-14 rounded-2xl text-base font-medium gap-2 bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20"
-        >
-          <MessageCircle className="w-5 h-5" />
-          Expresar lo que siento
-        </Button>
-      </motion.div>
+          {/* Mic button */}
+          <div className="flex flex-col items-center gap-4 mb-8">
+            <MicButton
+              isListening={listening}
+              onClick={handleMicClick}
+              disabled={!browserSupportsSpeechRecognition || !isMicrophoneAvailable}
+            />
+            {listening && (
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="text-sm text-primary font-medium"
+              >
+                Escuchando…
+              </motion.p>
+            )}
+            {!browserSupportsSpeechRecognition && (
+              <p className="text-xs text-center text-muted-foreground px-4">
+                Naran necesita acceso al micrófono para escucharte. Puedes escribir tu mensaje abajo.
+              </p>
+            )}
+            {browserSupportsSpeechRecognition && !isMicrophoneAvailable && (
+              <p className="text-xs text-center text-muted-foreground px-4">
+                Naran necesita acceso al micrófono para escucharte. Puedes escribir tu mensaje abajo.
+              </p>
+            )}
+          </div>
 
-      {/* Bottom hint */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.5 }}
-        className="flex items-center justify-center gap-2 py-4"
-      >
-        <Heart className="w-3 h-3 text-primary/40" />
-        <p className="text-xs text-muted-foreground/50">
-          Tu espacio seguro para comunicar mejor
-        </p>
-      </motion.div>
-    </div>
+          {/* Live transcript preview */}
+          {listening && transcript && (
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-sm text-center text-muted-foreground italic px-4 mb-4"
+            >
+              "{transcript}"
+            </motion.p>
+          )}
+
+          {/* Text input */}
+          <div className="flex flex-col gap-3">
+            <textarea
+              ref={textareaRef}
+              value={text}
+              onChange={e => setText(e.target.value)}
+              placeholder="O escribe aquí lo que pasó..."
+              rows={4}
+              className="w-full resize-none rounded-2xl border border-border bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all"
+            />
+            {text.trim() && !listening && (
+              <motion.button
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                onClick={() => handleAnalyze()}
+                className="w-full h-12 rounded-2xl bg-primary text-white text-sm font-medium shadow-md shadow-primary/20 active:scale-95 transition-transform"
+              >
+                Analizar
+              </motion.button>
+            )}
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
