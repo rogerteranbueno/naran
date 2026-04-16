@@ -1,0 +1,35 @@
+{
+  "name": "ConflictLog",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "Email del usuario"
+    },
+    "original_text": {
+      "type": "string",
+      "description": "Texto original escrito o grabado por el usuario"
+    },
+    "cognitive_note": {
+      "type": "string",
+      "description": "Nota cognitiva detectada por la IA"
+    },
+    "reframe_message": {
+      "type": "string",
+      "description": "Mensaje reencuadrado sugerido por Naran"
+    },
+    "action_taken": {
+      "type": "string",
+      "enum": [
+        "sent",
+        "saved"
+      ],
+      "description": "Acci\u00f3n que tom\u00f3 el usuario con el mensaje"
+    }
+  },
+  "required": [
+    "original_text",
+    "reframe_message",
+    "action_taken"
+  ]
+}
