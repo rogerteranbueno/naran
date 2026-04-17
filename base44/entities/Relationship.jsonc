@@ -1,0 +1,31 @@
+{
+  "name": "Relationship",
+  "type": "object",
+  "properties": {
+    "user1_email": {
+      "type": "string",
+      "description": "Email del usuario que cre\u00f3 la relaci\u00f3n"
+    },
+    "user2_email": {
+      "type": "string",
+      "description": "Email del usuario que se uni\u00f3 (nullable hasta que acepte)"
+    },
+    "invite_code": {
+      "type": "string",
+      "description": "C\u00f3digo \u00fanico de 6 caracteres para invitar a la pareja"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "active"
+      ],
+      "default": "pending",
+      "description": "Estado de la relaci\u00f3n"
+    }
+  },
+  "required": [
+    "user1_email",
+    "invite_code"
+  ]
+}

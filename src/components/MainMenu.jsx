@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Menu, X, History, BookOpen, LogOut, User, Dumbbell } from 'lucide-react';
+import { Menu, X, History, BookOpen, LogOut, User, Dumbbell, Headphones, Heart } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 
@@ -70,7 +70,9 @@ export default function MainMenu({ user }) {
               <div className="flex-1 px-3 py-4 space-y-1">
                 <MenuItem icon={History} label="Historial" onClick={() => go('/historial')} />
                 <MenuItem icon={Dumbbell} label="Práctica Guiada" onClick={() => go('/practica')} />
-                <MenuItem icon={BookOpen} label="Biblioteca de calma" onClick={() => go('/recursos')} />
+                <MenuItem icon={Heart} label="Espacio de pareja" onClick={() => go('/espacio')} />
+                <MenuItem icon={Headphones} label="Biblioteca Auditiva" onClick={() => go('/biblioteca-auditiva')} />
+                <MenuItem icon={BookOpen} label="Biblioteca CNV" onClick={() => go('/recursos')} />
                 <MenuItem icon={User} label="Mi perfil" onClick={() => go('/profile')} />
               </div>
 

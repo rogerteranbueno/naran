@@ -9,6 +9,7 @@ import MicPermissionCard from '@/components/MicPermissionCard';
 import MainMenu from '@/components/MainMenu';
 import Onboarding from '@/components/Onboarding';
 import StreakCounter from '@/components/StreakCounter';
+import TestimonialWall from '@/components/TestimonialWall';
 
 const AGGRESSIVE_RE = /\b(eres\s+un[a]?\s+\w+)\b/i;
 
@@ -201,6 +202,13 @@ export default function Home() {
             </motion.p>
           )}
         </AnimatePresence>
+
+        {/* Testimonial wall */}
+        {!listening && !showText && (
+          <div className="mt-2 w-full max-w-sm">
+            <TestimonialWall />
+          </div>
+        )}
 
         {/* Write alternative */}
         <AnimatePresence>

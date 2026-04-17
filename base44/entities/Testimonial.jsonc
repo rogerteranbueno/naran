@@ -1,0 +1,27 @@
+{
+  "name": "Testimonial",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "ID interno del usuario (no se muestra p\u00fablicamente)"
+    },
+    "content": {
+      "type": "string",
+      "description": "Texto del testimonio an\u00f3nimo, m\u00e1ximo 200 caracteres"
+    },
+    "applause_count": {
+      "type": "number",
+      "default": 0,
+      "description": "N\u00famero de aplausos recibidos"
+    },
+    "is_approved": {
+      "type": "boolean",
+      "default": false,
+      "description": "Si fue aprobado para mostrarse p\u00fablicamente"
+    }
+  },
+  "required": [
+    "content"
+  ]
+}

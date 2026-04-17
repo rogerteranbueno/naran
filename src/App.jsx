@@ -17,6 +17,10 @@ import Historial from '@/pages/Historial';
 import Recursos from '@/pages/Recursos';
 import Profile from '@/pages/Profile';
 import Practica from '@/pages/Practica';
+import Espacio from '@/pages/Espacio';
+import Unirse from '@/pages/Unirse';
+import BibliotecaAuditiva from '@/pages/BibliotecaAuditiva';
+import Admin from '@/pages/Admin';
 
 // Sync .dark class with system preference
 function SystemThemeSync() {
@@ -79,6 +83,10 @@ const AuthenticatedApp = () => {
         <Route path="/recursos" element={<AnimatedRoutes><Recursos /></AnimatedRoutes>} />
         <Route path="/profile" element={<AnimatedRoutes><Profile /></AnimatedRoutes>} />
         <Route path="/practica" element={<AnimatedRoutes><Practica /></AnimatedRoutes>} />
+        <Route path="/espacio" element={<AnimatedRoutes><Espacio /></AnimatedRoutes>} />
+        <Route path="/unirse" element={<AnimatedRoutes><Unirse /></AnimatedRoutes>} />
+        <Route path="/biblioteca-auditiva" element={<AnimatedRoutes><BibliotecaAuditiva /></AnimatedRoutes>} />
+        <Route path="/admin" element={<AnimatedRoutes><Admin /></AnimatedRoutes>} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>

@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, BookmarkPlus, Share2, Check, ChevronDown, ChevronUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
+import TestimonialPrompt from '@/components/TestimonialPrompt';
 
 const GOTTMAN_TIPS = {
   'crítica': 'Inicio suave: habla de TU sentimiento, no del defecto del otro.',
@@ -40,6 +41,7 @@ export default function Reframe() {
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState(null);
+  const [showTestimonialPrompt, setShowTestimonialPrompt] = useState(false);
 
   // Limpiar cualquier prefijo que el prompt interno haya colado en original_text
   const rawText = state?.original_text || '';
@@ -70,8 +72,9 @@ export default function Reframe() {
     await saveLog({ original_text: originalText, cognitive_note: cognitiveNote, reframe_message: reframeMessage, action_taken: 'saved' });
     setSaved(true);
     setSaving(false);
+    setShowTestimonialPrompt(true);
     showToast('Guardado en tu historial ✓');
-    setTimeout(() => navigate('/home'), 1400);
+    setTimeout(() => navigate('/home'), 3500);
   };
 
   const handleShare = async () => {
@@ -102,6 +105,11 @@ export default function Reframe() {
       </div>
 
       <div className="flex-1 flex flex-col px-5 pb-6 overflow-y-auto">
+        <AnimatePresence>
+          {showTestimonialPrompt && (
+            <TestimonialPrompt onDismiss={() => setShowTestimonialPrompt(false)} />
+          )}
+        </AnimatePresence>
 
         {/* Original (crossed out) */}
         {originalText && (
