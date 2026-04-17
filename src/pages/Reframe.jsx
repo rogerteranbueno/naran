@@ -183,16 +183,20 @@ export default function Reframe() {
           transition={{ delay: 0.12 }}
           className="flex-1 mb-6"
         >
-          <p className="text-xs text-muted-foreground/60 mb-3 uppercase tracking-wide font-medium">Naran sugiere</p>
-          <div className="rounded-3xl bg-white border border-border/40 shadow-sm overflow-hidden">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-xs text-muted-foreground/60 uppercase tracking-wide font-medium">Naran sugiere</p>
+            <span className="flex items-center gap-1 text-[10px] text-primary/60 font-medium">
+              <span>✏️</span> Toca para editar
+            </span>
+          </div>
+          <div className="rounded-3xl bg-white border-2 border-primary/20 shadow-sm overflow-hidden focus-within:border-primary/50 transition-colors">
             <textarea
               value={reframeMessage}
               onChange={e => setReframeMessage(e.target.value)}
               rows={5}
-              className="w-full resize-none px-5 pt-6 pb-4 text-xl leading-relaxed bg-transparent focus:outline-none tracking-wide"
+              className="w-full resize-none px-5 pt-6 pb-6 text-xl leading-relaxed bg-transparent focus:outline-none tracking-wide cursor-text"
               style={{ color: '#2C2C2C' }}
             />
-            <p className="px-5 pb-4 text-xs text-muted-foreground/60">✏️ Puedes editar este mensaje antes de guardarlo o enviarlo</p>
           </div>
         </motion.div>
       </div>
