@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, ExternalLink, Youtube, Mic } from 'lucide-react';
 import { motion } from 'framer-motion';
+import FeedbackBox from '@/components/FeedbackBox';
 
 const PILAR_SECTION = {
   title: 'Pilar de la Torre y la CNV',
@@ -93,6 +94,18 @@ const SECTIONS = [
   },
 ];
 
+function InfoRow({ emoji, title, desc }) {
+  return (
+    <div className="flex items-start gap-3">
+      <span className="text-base shrink-0 mt-0.5">{emoji}</span>
+      <div>
+        <p className="text-xs font-semibold text-foreground">{title}</p>
+        <p className="text-xs text-muted-foreground leading-relaxed">{desc}</p>
+      </div>
+    </div>
+  );
+}
+
 export default function Recursos() {
   const navigate = useNavigate();
   const pilarRef = useRef(null);
@@ -122,11 +135,40 @@ export default function Recursos() {
           <span className="text-sm">Volver</span>
         </button>
         <p className="flex-1 text-center text-sm font-medium text-foreground mr-12">
-          Biblioteca
+          Conoce Naran
         </p>
       </div>
 
       <div className="flex-1 overflow-y-auto px-5 pb-10 space-y-8">
+
+        {/* Sobre Naran */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="rounded-3xl overflow-hidden border border-border"
+          style={{ background: 'linear-gradient(135deg, rgba(224,122,95,0.10) 0%, rgba(224,122,95,0.04) 100%)' }}
+        >
+          <div className="px-5 pt-6 pb-5">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-2xl">🍊</span>
+              <h2 className="text-base font-semibold text-foreground">¿Qué es Naran?</h2>
+            </div>
+            <p className="text-sm text-foreground/80 leading-relaxed mb-4">
+              Naran es tu espacio de pausa antes de responder. Cuando la emoción es alta y las palabras pueden dañar, Naran te ayuda a transformar lo que quieres decir en algo que pueda ser escuchado de verdad.
+            </p>
+            <div className="space-y-3">
+              <InfoRow emoji="🎙️" title="Habla o escribe" desc="Graba tu mensaje tal como lo sientes — sin filtros — y Naran lo reencuadra usando técnicas de CNV y el Método Gottman." />
+              <InfoRow emoji="🧠" title="Inteligencia empática" desc="La IA detecta patrones de comunicación dañinos (crítica, desprecio, defensividad, evasión) y te propone una alternativa asertiva." />
+              <InfoRow emoji="💾" title="Historial de momentos" desc="Guarda tus reencuadres para revisarlos, aprender de tus patrones y ver tu evolución a lo largo del tiempo." />
+              <InfoRow emoji="💑" title="Espacio de pareja" desc="Conecta con tu pareja para compartir el proceso y trabajar juntos hacia una comunicación más amorosa." />
+            </div>
+            <div className="mt-4 rounded-2xl px-4 py-3 border border-primary/20" style={{ background: 'rgba(224,122,95,0.08)' }}>
+              <p className="text-xs text-foreground/70 leading-relaxed italic">
+                "El objetivo no es no sentir — es aprender a expresar lo que sentimos de una manera que conecte en lugar de separar."
+              </p>
+            </div>
+          </div>
+        </motion.div>
 
         {/* Pilar de la Torre */}
         <motion.div
@@ -178,6 +220,15 @@ export default function Recursos() {
               ))}
             </div>
           </div>
+        </motion.div>
+
+        {/* Feedback */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.05 }}
+        >
+          <FeedbackBox />
         </motion.div>
 
         {SECTIONS.map((section, si) => (

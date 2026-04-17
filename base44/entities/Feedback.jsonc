@@ -1,0 +1,28 @@
+{
+  "name": "Feedback",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "Email del usuario que envi\u00f3 el feedback"
+    },
+    "message": {
+      "type": "string",
+      "description": "Mensaje de mejora o sugerencia del usuario"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "mejora",
+        "error",
+        "idea",
+        "otro"
+      ],
+      "default": "mejora",
+      "description": "Categor\u00eda del feedback"
+    }
+  },
+  "required": [
+    "message"
+  ]
+}
