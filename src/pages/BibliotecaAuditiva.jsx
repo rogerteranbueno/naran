@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Heart, Play, Pause, Headphones } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowLeft, Heart, Play, Headphones } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
+import FloatingAudioPlayer from '@/components/FloatingAudioPlayer';
 
 const AUDIOS = [
   {
@@ -71,20 +72,32 @@ export default function BibliotecaAuditiva() {
   const navigate = useNavigate();
   const [favorites, setFavorites] = useState([]);
   const [activeFilter, setActiveFilter] = useState('Todos');
+  const [activeAudio, setActiveAudio] = useState(null);
 
   useEffect(() => {
-    const saved = localStorage.getItem('naran_audio_favs');
-    if (saved) setFavorites(JSON.parse(saved));
+    // Cargar favoritos: primero de User, fallback a localStorage
+    base44.auth.me().then(u => {
+      if (u?.favorite_audios?.length) {
+        setFavorites(u.favorite_audios);
+      } else {
+        const saved = localStorage.getItem('naran_audio_favs');
+        if (saved) setFavorites(JSON.parse(saved));
+      }
+    }).catch(() => {
+      const saved = localStorage.getItem('naran_audio_favs');
+      if (saved) setFavorites(JSON.parse(saved));
+    });
   }, []);
 
-  const toggleFavorite = (id) => {
+  const toggleFavorite = async (id) => {
     const next = favorites.includes(id) ? favorites.filter(f => f !== id) : [...favorites, id];
     setFavorites(next);
     localStorage.setItem('naran_audio_favs', JSON.stringify(next));
+    base44.auth.updateMe({ favorite_audios: next }).catch(() => {});
   };
 
   const openAudio = (audio) => {
-    window.open(audio.url, '_blank');
+    setActiveAudio(audio);
   };
 
   const categories = ['Todos', 'Meditación', 'Mini-lección CNV'];
@@ -100,6 +113,8 @@ export default function BibliotecaAuditiva() {
         </button>
         <p className="flex-1 text-center text-sm font-medium text-foreground mr-12">Biblioteca Auditiva</p>
       </div>
+
+      <FloatingAudioPlayer audio={activeAudio} onClose={() => setActiveAudio(null)} />
 
       <div className="flex-1 overflow-y-auto px-5 pb-10 space-y-6">
         {/* Filtros */}
