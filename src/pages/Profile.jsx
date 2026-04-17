@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, LogOut, BookOpen, Clock } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { ArrowLeft, LogOut, BookOpen, Clock, Trash2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 
 export default function Profile() {
@@ -9,6 +9,9 @@ export default function Profile() {
   const [user, setUser] = useState(null);
   const [weeklyCount, setWeeklyCount] = useState(0);
   const [weeklyPattern, setWeeklyPattern] = useState('Comunicación clara');
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState('');
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
@@ -134,7 +137,7 @@ export default function Profile() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3 }}
-          className="pt-4"
+          className="pt-4 space-y-2"
         >
           <button
             onClick={() => base44.auth.logout('/login')}
@@ -143,8 +146,77 @@ export default function Profile() {
             <LogOut className="w-4 h-4" />
             Cerrar sesión
           </button>
+
+          <button
+            onClick={() => setShowDeleteDialog(true)}
+            className="w-full flex items-center justify-center gap-2 py-3 text-sm text-red-400 hover:text-red-600 transition-colors"
+          >
+            <Trash2 className="w-4 h-4" />
+            Eliminar cuenta
+          </button>
         </motion.div>
       </div>
+
+      {/* Delete Account Dialog */}
+      <AnimatePresence>
+        {showDeleteDialog && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => { setShowDeleteDialog(false); setDeleteConfirm(''); }}
+              className="fixed inset-0 bg-black/40 z-40"
+            />
+            <motion.div
+              initial={{ opacity: 0, y: 40, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 20, scale: 0.96 }}
+              transition={{ type: 'spring', damping: 28, stiffness: 300 }}
+              className="fixed bottom-0 left-0 right-0 z-50 max-w-md mx-auto"
+            >
+              <div className="bg-white rounded-t-3xl px-6 pt-6 pb-10 shadow-2xl">
+                <div className="w-10 h-1 rounded-full bg-border mx-auto mb-6" />
+                <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-4 mx-auto"
+                  style={{ background: 'rgba(239,68,68,0.10)' }}>
+                  <Trash2 className="w-5 h-5 text-red-500" />
+                </div>
+                <h2 className="text-lg font-semibold text-foreground text-center mb-2">Eliminar cuenta</h2>
+                <p className="text-sm text-muted-foreground text-center leading-relaxed mb-6">
+                  Esta acción es irreversible. Se borrarán todos tus momentos y datos. Escribe <strong>ELIMINAR</strong> para confirmar.
+                </p>
+                <input
+                  type="text"
+                  value={deleteConfirm}
+                  onChange={e => setDeleteConfirm(e.target.value)}
+                  placeholder="ELIMINAR"
+                  className="w-full rounded-2xl border border-border px-4 py-3 text-sm text-center focus:outline-none focus:ring-2 focus:ring-red-300 mb-4"
+                />
+                <button
+                  disabled={deleteConfirm !== 'ELIMINAR' || deleting}
+                  onClick={async () => {
+                    setDeleting(true);
+                    // Delete all logs, then logout
+                    const logs = await base44.entities.ConflictLog.list('-created_date', 500).catch(() => []);
+                    await Promise.all(logs.map(l => base44.entities.ConflictLog.delete(l.id).catch(() => {})));
+                    base44.auth.logout('/login');
+                  }}
+                  className="w-full h-12 rounded-2xl text-white text-sm font-medium transition-all disabled:opacity-40"
+                  style={{ background: '#ef4444' }}
+                >
+                  {deleting ? 'Eliminando…' : 'Sí, eliminar mi cuenta'}
+                </button>
+                <button
+                  onClick={() => { setShowDeleteDialog(false); setDeleteConfirm(''); }}
+                  className="mt-3 w-full py-3 text-sm text-muted-foreground"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

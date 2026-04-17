@@ -1,10 +1,12 @@
 import { Toaster } from "@/components/ui/toaster"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate, useLocation } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
+import { AnimatePresence, motion } from 'framer-motion';
+import { useEffect } from 'react';
 
 import MobileLayout from '@/components/MobileLayout';
 import Welcome from '@/pages/Welcome';
@@ -14,6 +16,39 @@ import LogDetail from '@/pages/LogDetail';
 import Historial from '@/pages/Historial';
 import Recursos from '@/pages/Recursos';
 import Profile from '@/pages/Profile';
+
+// Sync .dark class with system preference
+function SystemThemeSync() {
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    const apply = (e) => {
+      document.documentElement.classList.toggle('dark', e.matches);
+    };
+    apply(mq);
+    mq.addEventListener('change', apply);
+    return () => mq.removeEventListener('change', apply);
+  }, []);
+  return null;
+}
+
+// Animated page wrapper
+function AnimatedRoutes({ children }) {
+  const location = useLocation();
+  return (
+    <AnimatePresence mode="wait" initial={false}>
+      <motion.div
+        key={location.pathname}
+        initial={{ x: 40, opacity: 0 }}
+        animate={{ x: 0, opacity: 1 }}
+        exit={{ x: -40, opacity: 0 }}
+        transition={{ duration: 0.22, ease: 'easeInOut' }}
+        style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}
+      >
+        {children}
+      </motion.div>
+    </AnimatePresence>
+  );
+}
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError } = useAuth();
@@ -34,14 +69,14 @@ const AuthenticatedApp = () => {
     <Routes>
       <Route element={<MobileLayout />}>
         <Route path="/" element={<Navigate to="/login" replace />} />
-        <Route path="/login" element={<Welcome />} />
-        <Route path="/home" element={<Home />} />
+        <Route path="/login" element={<AnimatedRoutes><Welcome /></AnimatedRoutes>} />
+        <Route path="/home" element={<AnimatedRoutes><Home /></AnimatedRoutes>} />
         <Route path="/app" element={<Navigate to="/home" replace />} />
-        <Route path="/reframe" element={<Reframe />} />
-        <Route path="/log/:id" element={<LogDetail />} />
-        <Route path="/historial" element={<Historial />} />
-        <Route path="/recursos" element={<Recursos />} />
-        <Route path="/profile" element={<Profile />} />
+        <Route path="/reframe" element={<AnimatedRoutes><Reframe /></AnimatedRoutes>} />
+        <Route path="/log/:id" element={<AnimatedRoutes><LogDetail /></AnimatedRoutes>} />
+        <Route path="/historial" element={<AnimatedRoutes><Historial /></AnimatedRoutes>} />
+        <Route path="/recursos" element={<AnimatedRoutes><Recursos /></AnimatedRoutes>} />
+        <Route path="/profile" element={<AnimatedRoutes><Profile /></AnimatedRoutes>} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>
@@ -52,6 +87,7 @@ function App() {
   return (
     <AuthProvider>
       <QueryClientProvider client={queryClientInstance}>
+        <SystemThemeSync />
         <Router>
           <AuthenticatedApp />
         </Router>

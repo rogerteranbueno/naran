@@ -91,6 +91,16 @@
   }
 }
 
+/* Mobile UX */
+html, body {
+  overscroll-behavior: none;
+}
+
+button, a, label, [role="button"] {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
 /* Safe area support for mobile */
 @supports (padding: env(safe-area-inset-top)) {
   .safe-top {
