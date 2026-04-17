@@ -101,21 +101,21 @@ export default function Profile() {
               title="Comunicación No Violenta"
               subtitle="4 pasos para expresar sin herir"
               color="rgba(224,122,95,0.10)"
-              onClick={() => navigate('/recursos')}
+              onClick={() => navigate('/recursos?section=cnv')}
             />
             <LibraryCard
               emoji="⚠️"
               title="Los 4 Jinetes"
               subtitle="Patrones que dañan y sus antídotos"
               color="rgba(201,97,74,0.10)"
-              onClick={() => navigate('/recursos')}
+              onClick={() => navigate('/recursos?section=jinetes')}
             />
             <LibraryCard
               emoji="🍊"
               title="Pilar de la Torre"
               subtitle="CNV en español · Videos y podcast"
               color="rgba(224,122,95,0.10)"
-              onClick={() => navigate('/recursos')}
+              onClick={() => navigate('/recursos?section=pilar')}
             />
           </div>
         </motion.div>

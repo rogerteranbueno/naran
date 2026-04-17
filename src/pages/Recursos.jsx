@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, ExternalLink, Youtube, Mic } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -95,6 +95,20 @@ const SECTIONS = [
 
 export default function Recursos() {
   const navigate = useNavigate();
+  const pilarRef = useRef(null);
+  const cnvRef = useRef(null);
+  const jinetesRef = useRef(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const section = params.get('section');
+    if (!section) return;
+    const delay = setTimeout(() => {
+      const map = { pilar: pilarRef, cnv: cnvRef, jinetes: jinetesRef };
+      map[section]?.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 300);
+    return () => clearTimeout(delay);
+  }, []);
 
   return (
     <div className="flex-1 flex flex-col">
@@ -116,6 +130,7 @@ export default function Recursos() {
 
         {/* Pilar de la Torre */}
         <motion.div
+          ref={pilarRef}
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           className="rounded-3xl overflow-hidden border border-border"
@@ -168,6 +183,7 @@ export default function Recursos() {
         {SECTIONS.map((section, si) => (
           <motion.div
             key={si}
+            ref={si === 0 ? cnvRef : jinetesRef}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: si * 0.1 }}
