@@ -8,6 +8,8 @@ import AnalyzingLoader from '@/components/AnalyzingLoader';
 import MicPermissionCard from '@/components/MicPermissionCard';
 import RecentMoments from '@/components/RecentMoments';
 import Onboarding from '@/components/Onboarding';
+import EmotionSelector from '@/components/EmotionSelector';
+import FollowUpCard from '@/components/FollowUpCard';
 import useSpeechInput from '@/hooks/useSpeechInput';
 
 const SYSTEM_PROMPT = `Eres 'Naran', un asistente conductual para parejas basado en el Instituto Gottman, Terapia Cognitivo-Conductual (TCC) y Comunicación No Violenta (CNV).
@@ -71,6 +73,10 @@ export default function Dashboard() {
   const [analyzing, setAnalyzing] = useState(false);
   const [logs, setLogs] = useState([]);
   const [showOnboarding, setShowOnboarding] = useState(!localStorage.getItem('naran_onboarded'));
+  const [showEmotionSelector, setShowEmotionSelector] = useState(false);
+  const [pendingMicAction, setPendingMicAction] = useState(false); // true = mic, false = text
+  const [emotionLabel, setEmotionLabel] = useState(null);
+  const [followUpLog, setFollowUpLog] = useState(null);
 
   const { listening, transcript, error, startListening, stopListening, resetTranscript, browserSupported } = useSpeechInput();
 
@@ -79,37 +85,88 @@ export default function Dashboard() {
   }, []);
 
   useEffect(() => {
-    base44.entities.ConflictLog.list('-created_date', 3).then(setLogs).catch(() => {});
-  }, [analyzing]); // refetch after analyzing (when user returns)
+    base44.entities.ConflictLog.list('-created_date', 5).then(logs => {
+      setLogs(logs.slice(0, 3));
+      // Check for pending follow-up (sent/saved > 20h ago, status still pending)
+      const cutoff = Date.now() - 20 * 60 * 60 * 1000;
+      const pending = logs.find(l =>
+        l.status === 'pending' &&
+        l.action_taken &&
+        new Date(l.created_date).getTime() < cutoff
+      );
+      setFollowUpLog(pending || null);
+    }).catch(() => {});
+  }, [analyzing]);
 
   // Keep textarea in sync with live transcript
   useEffect(() => {
     if (listening) setText(transcript);
   }, [transcript, listening]);
 
-  const handleMicClick = async () => {
+  const handleMicClick = () => {
     if (listening) {
       if (navigator.vibrate) navigator.vibrate(5);
       stopListening();
-      const finalText = transcript.trim();
-      if (finalText) {
-        resetTranscript();
-        await handleAnalyze(finalText);
-      }
+      // analyze will happen after emotion selection
     } else {
-      if (navigator.vibrate) navigator.vibrate(10);
-      setText('');
-      resetTranscript();
-      startListening();
+      // Show emotion selector before starting mic
+      setPendingMicAction(true);
+      setShowEmotionSelector(true);
     }
   };
+
+  const startMicAfterEmotion = () => {
+    if (navigator.vibrate) navigator.vibrate(10);
+    setText('');
+    resetTranscript();
+    startListening();
+    setShowEmotionSelector(false);
+  };
+
+  const handleEmotionSelect = (emotion) => {
+    setEmotionLabel(emotion);
+    if (pendingMicAction) {
+      startMicAfterEmotion();
+    } else {
+      setShowEmotionSelector(false);
+    }
+  };
+
+  const handleEmotionSkip = () => {
+    setEmotionLabel(null);
+    if (pendingMicAction) {
+      startMicAfterEmotion();
+    } else {
+      setShowEmotionSelector(false);
+    }
+  };
+
+  // When mic stops with transcript, analyze
+  useEffect(() => {
+    if (!listening && transcript.trim() && pendingMicAction) {
+      const finalText = transcript.trim();
+      resetTranscript();
+      setPendingMicAction(false);
+      handleAnalyze(finalText);
+    }
+  }, [listening]);
 
   const handleAnalyze = async (inputText) => {
     const content = (inputText ?? text).trim();
     if (!content) return;
     setAnalyzing(true);
-    const result = await analyzeConflict(content);
+    const prompt = emotionLabel
+      ? `El usuario reporta sentirse: ${emotionLabel}. Su mensaje: "${content}"`
+      : content;
+    const result = await analyzeConflict(prompt);
+    result.emotion_label = emotionLabel;
     navigate('/reframe', { state: result });
+  };
+
+  const handleAnalyzeFromText = () => {
+    if (!text.trim()) return;
+    setPendingMicAction(false);
+    setShowEmotionSelector(true);
   };
 
   const greeting = () => {
@@ -121,6 +178,18 @@ export default function Dashboard() {
 
   if (showOnboarding) {
     return <Onboarding onDone={() => setShowOnboarding(false)} />;
+  }
+
+  if (showEmotionSelector) {
+    return (
+      <AnimatePresence mode="wait">
+        <EmotionSelector
+          key="emotion"
+          onSelect={handleEmotionSelect}
+          onSkip={handleEmotionSkip}
+        />
+      </AnimatePresence>
+    );
   }
 
   return (
@@ -203,7 +272,7 @@ export default function Dashboard() {
               <motion.button
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
-                onClick={() => handleAnalyze()}
+                onClick={handleAnalyzeFromText}
                 className="w-full h-12 rounded-2xl text-white text-sm font-medium shadow-md active:scale-95 transition-transform"
                 style={{ background: '#E07A5F' }}
               >
@@ -211,6 +280,14 @@ export default function Dashboard() {
               </motion.button>
             )}
           </div>
+
+          {/* Follow-up card for pending logs */}
+          {followUpLog && (
+            <FollowUpCard
+              log={followUpLog}
+              onDone={() => setFollowUpLog(null)}
+            />
+          )}
 
           {/* Recent moments */}
           <RecentMoments logs={logs} />

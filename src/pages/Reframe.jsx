@@ -3,8 +3,9 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Lightbulb, Copy, Check, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
+import GottmanPill from '@/components/GottmanPill';
 
-async function saveConflictLog({ original_text, cognitive_note, reframe_message, action_taken }) {
+async function saveConflictLog({ original_text, cognitive_note, reframe_message, action_taken, emotion_label }) {
   const user = await base44.auth.me().catch(() => null);
   await base44.entities.ConflictLog.create({
     user_email: user?.email || '',
@@ -12,6 +13,8 @@ async function saveConflictLog({ original_text, cognitive_note, reframe_message,
     cognitive_note,
     reframe_message,
     action_taken,
+    status: 'pending',
+    ...(emotion_label ? { emotion_label } : {}),
   });
 }
 
@@ -24,6 +27,7 @@ export default function Reframe() {
 
   const originalText = state?.original_text || '';
   const cognitiveNote = state?.cognitive_note || '';
+  const emotionLabel = state?.emotion_label || null;
   const [editedMessage, setEditedMessage] = useState(state?.reframe_message || '');
 
   const showToast = (msg) => {
@@ -41,7 +45,7 @@ export default function Reframe() {
     setSaving(true);
     await navigator.clipboard.writeText(editedMessage).catch(() => {});
     try {
-      await saveConflictLog({ original_text: originalText, cognitive_note: cognitiveNote, reframe_message: editedMessage, action_taken: 'sent' });
+      await saveConflictLog({ original_text: originalText, cognitive_note: cognitiveNote, reframe_message: editedMessage, action_taken: 'sent', emotion_label: emotionLabel });
     } catch {
       showToast('No se pudo guardar. Revisa tu conexión.');
       setSaving(false);
@@ -59,7 +63,7 @@ export default function Reframe() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      await saveConflictLog({ original_text: originalText, cognitive_note: cognitiveNote, reframe_message: editedMessage, action_taken: 'saved' });
+      await saveConflictLog({ original_text: originalText, cognitive_note: cognitiveNote, reframe_message: editedMessage, action_taken: 'saved', emotion_label: emotionLabel });
     } catch {
       showToast('No se pudo guardar. Revisa tu conexión.');
       setSaving(false);
@@ -143,6 +147,9 @@ export default function Reframe() {
           <p className="px-5 pb-3 text-xs text-muted-foreground/50">Puedes editar el mensaje antes de enviarlo</p>
         </div>
       </motion.div>
+
+      {/* Gottman Pill */}
+      <GottmanPill cognitiveNote={cognitiveNote} />
 
       {/* Action buttons */}
       <motion.div

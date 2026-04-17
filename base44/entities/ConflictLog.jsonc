@@ -10,6 +10,16 @@
       "type": "string",
       "description": "Texto original escrito o grabado por el usuario"
     },
+    "emotion_label": {
+      "type": "string",
+      "enum": [
+        "enojo",
+        "tristeza",
+        "ansiedad",
+        "confusion"
+      ],
+      "description": "Emoci\u00f3n primaria seleccionada por el usuario antes del reframe"
+    },
     "cognitive_note": {
       "type": "string",
       "description": "Nota cognitiva detectada por la IA"
@@ -25,6 +35,16 @@
         "saved"
       ],
       "description": "Acci\u00f3n que tom\u00f3 el usuario con el mensaje"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "resolved",
+        "escalated"
+      ],
+      "default": "pending",
+      "description": "Estado del ciclo del conflicto"
     }
   },
   "required": [
