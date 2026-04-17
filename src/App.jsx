@@ -11,6 +11,8 @@ import Welcome from '@/pages/Welcome';
 import Dashboard from '@/pages/Dashboard';
 import Reframe from '@/pages/Reframe';
 import LogDetail from '@/pages/LogDetail';
+import Historial from '@/pages/Historial';
+import Recursos from '@/pages/Recursos';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -37,6 +39,8 @@ const AuthenticatedApp = () => {
         <Route path="/app" element={<Dashboard />} />
         <Route path="/reframe" element={<Reframe />} />
         <Route path="/log/:id" element={<LogDetail />} />
+        <Route path="/historial" element={<Historial />} />
+        <Route path="/recursos" element={<Recursos />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>

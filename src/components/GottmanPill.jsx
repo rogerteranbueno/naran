@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
 
@@ -21,6 +22,7 @@ function getPillText(cognitiveNote = '') {
 
 export default function GottmanPill({ cognitiveNote }) {
   const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
   const text = getPillText(cognitiveNote);
 
   return (
@@ -51,9 +53,16 @@ export default function GottmanPill({ cognitiveNote }) {
             transition={{ duration: 0.22 }}
             className="overflow-hidden"
           >
-            <p className="px-4 pb-4 text-xs text-muted-foreground leading-relaxed" style={{ color: '#6B6460' }}>
+            <p className="px-4 pb-3 text-xs leading-relaxed" style={{ color: '#6B6460' }}>
               {text}
             </p>
+            <button
+              onClick={() => navigate('/recursos')}
+              className="px-4 pb-4 text-xs font-medium flex items-center gap-1 hover:opacity-70 transition-opacity"
+              style={{ color: '#E07A5F' }}
+            >
+              📚 Saber más sobre CNV y Gottman
+            </button>
           </motion.div>
         )}
       </AnimatePresence>

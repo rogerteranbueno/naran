@@ -12,13 +12,15 @@ function getEmoji(cognitiveNote = '') {
 }
 
 function timeAgo(dateStr) {
-  const diffMs = Date.now() - new Date(dateStr).getTime();
-  if (diffMs < 0) return 'Ahora';
+  const now = Date.now();
+  const then = new Date(dateStr).getTime();
+  if (isNaN(then) || then > now) return 'Ahora';
+  const diffMs = now - then;
   const diffMins = Math.floor(diffMs / 60000);
   if (diffMins < 1) return 'Ahora';
   if (diffMins < 60) return `Hace ${diffMins} min`;
   const diffHours = Math.floor(diffMins / 60);
-  if (diffHours < 24) return `Hace ${diffHours} hora${diffHours > 1 ? 's' : ''}`;
+  if (diffHours < 24) return `Hace ${diffHours} h`;
   const diffDays = Math.floor(diffHours / 24);
   if (diffDays === 1) return 'Ayer';
   return `Hace ${diffDays} días`;
@@ -50,7 +52,7 @@ export default function RecentMoments({ logs }) {
           </p>
         </div>
       ) : (
-        <div className="flex flex-col divide-y divide-border rounded-2xl border border-border overflow-hidden bg-white">
+        <div className="flex flex-col divide-y divide-border rounded-2xl border border-border overflow-hidden bg-white max-h-64 overflow-y-auto">
           {logs.map((log, i) => (
             <motion.button
               key={log.id}
