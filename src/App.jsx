@@ -8,14 +8,15 @@ import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 
 import MobileLayout from '@/components/MobileLayout';
 import Welcome from '@/pages/Welcome';
-import Dashboard from '@/pages/Dashboard';
+import Home from '@/pages/Home';
 import Reframe from '@/pages/Reframe';
 import LogDetail from '@/pages/LogDetail';
 import Historial from '@/pages/Historial';
 import Recursos from '@/pages/Recursos';
+import Profile from '@/pages/Profile';
 
 const AuthenticatedApp = () => {
-  const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
+  const { isLoadingAuth, isLoadingPublicSettings, authError } = useAuth();
 
   if (isLoadingPublicSettings || isLoadingAuth) {
     return (
@@ -25,10 +26,8 @@ const AuthenticatedApp = () => {
     );
   }
 
-  if (authError) {
-    if (authError.type === 'user_not_registered') {
-      return <UserNotRegisteredError />;
-    }
+  if (authError?.type === 'user_not_registered') {
+    return <UserNotRegisteredError />;
   }
 
   return (
@@ -36,11 +35,13 @@ const AuthenticatedApp = () => {
       <Route element={<MobileLayout />}>
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<Welcome />} />
-        <Route path="/app" element={<Dashboard />} />
+        <Route path="/home" element={<Home />} />
+        <Route path="/app" element={<Navigate to="/home" replace />} />
         <Route path="/reframe" element={<Reframe />} />
         <Route path="/log/:id" element={<LogDetail />} />
         <Route path="/historial" element={<Historial />} />
         <Route path="/recursos" element={<Recursos />} />
+        <Route path="/profile" element={<Profile />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>

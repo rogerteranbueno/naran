@@ -1,89 +1,111 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Heart, Mic, Lock, ArrowRight } from 'lucide-react';
+import { base44 } from '@/api/base44Client';
+import { Loader2 } from 'lucide-react';
 
-const SLIDES = [
-  {
-    icon: Heart,
-    title: 'Una pausa antes de reaccionar',
-    text: 'Naran es tu espacio para convertir el enfado en claridad, antes de que las palabras hagan daño.',
-  },
-  {
-    icon: Mic,
-    title: '¿Cómo funciona?',
-    text: 'Habla o escribe lo que sientes. Naran te sugiere una forma más amable y efectiva de expresarlo.',
-  },
-  {
-    icon: Lock,
-    title: 'Solo para ti',
-    text: 'Tus momentos se guardan únicamente en tu cuenta. Naran no juzga, solo traduce.',
-  },
-];
+const EXAMPLE = 'Odio que dejes los calcetines tirados';
 
 export default function Onboarding({ onDone }) {
-  const [step, setStep] = useState(0);
-  const isLast = step === SLIDES.length - 1;
+  const [text, setText] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [reframe, setReframe] = useState(null);
 
-  const handleNext = () => {
-    if (isLast) {
-      localStorage.setItem('naran_onboarded', '1');
-      onDone();
-    } else {
-      setStep(s => s + 1);
-    }
+  const handleTransform = async () => {
+    const trimmed = text.trim() || EXAMPLE;
+    setLoading(true);
+    const result = await base44.integrations.Core.InvokeLLM({
+      prompt: `El usuario escribió: "${trimmed}". 
+Eres Naran, un asistente de comunicación basado en CNV.
+Reescribe el mensaje de forma empática y asertiva en primera persona (máx 2 frases). Solo devuelve el mensaje reescrito, sin explicaciones.`,
+    });
+    setReframe(typeof result === 'string' ? result : result?.reframe_message || result);
+    setLoading(false);
   };
 
-  const slide = SLIDES[step];
-  const Icon = slide.icon;
+  const handleDone = () => {
+    localStorage.setItem('naran_onboarded', '1');
+    onDone();
+  };
 
   return (
-    <div className="flex-1 flex flex-col items-center justify-between px-8 py-14">
-      {/* Slides */}
-      <div className="flex-1 flex flex-col items-center justify-center w-full">
-        <AnimatePresence mode="wait">
+    <div className="flex-1 flex flex-col items-center justify-center px-8 py-16 min-h-screen"
+      style={{ background: '#111' }}>
+
+      <AnimatePresence mode="wait">
+        {!reframe ? (
           <motion.div
-            key={step}
-            initial={{ opacity: 0, x: 30 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -30 }}
-            transition={{ duration: 0.28, ease: 'easeOut' }}
-            className="flex flex-col items-center text-center gap-6"
+            key="input"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="w-full max-w-sm flex flex-col items-center gap-8"
           >
-            <div className="w-20 h-20 rounded-3xl flex items-center justify-center" style={{ background: 'rgba(224,122,95,0.12)' }}>
-              <Icon className="w-10 h-10" style={{ color: '#E07A5F' }} strokeWidth={1.5} />
+            <div className="text-center">
+              <p className="text-3xl mb-3">🍊</p>
+              <h1 className="text-2xl font-semibold text-white tracking-tight leading-snug">
+                Escribe lo que sientes ahora mismo.
+              </h1>
+              <p className="text-sm text-white/40 mt-2 leading-relaxed">Sin filtros. Como lo dirías de verdad.</p>
             </div>
-            <div className="space-y-3">
-              <h2 className="text-2xl font-semibold tracking-tight text-foreground">{slide.title}</h2>
-              <p className="text-sm text-muted-foreground leading-relaxed max-w-[260px]">{slide.text}</p>
+
+            <div className="w-full">
+              <textarea
+                value={text}
+                onChange={e => setText(e.target.value)}
+                placeholder={`"${EXAMPLE}"`}
+                rows={3}
+                className="w-full resize-none rounded-2xl bg-white/8 border border-white/10 px-4 py-3 text-white text-base leading-relaxed focus:outline-none focus:ring-2 focus:ring-white/20 placeholder:text-white/25"
+                style={{ background: 'rgba(255,255,255,0.06)' }}
+              />
             </div>
+
+            <button
+              onClick={handleTransform}
+              disabled={loading}
+              className="w-full h-14 rounded-2xl text-white text-base font-medium flex items-center justify-center gap-2 transition-all disabled:opacity-50"
+              style={{ background: '#E07A5F', boxShadow: '0 8px 24px rgba(224,122,95,0.35)' }}
+            >
+              {loading
+                ? <><Loader2 className="w-5 h-5 animate-spin" /> Transformando…</>
+                : 'Ver la transformación →'
+              }
+            </button>
           </motion.div>
-        </AnimatePresence>
-      </div>
+        ) : (
+          <motion.div
+            key="result"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="w-full max-w-sm flex flex-col items-center gap-8"
+          >
+            <div className="text-center">
+              <p className="text-3xl mb-3">✨</p>
+              <h2 className="text-xl font-semibold text-white tracking-tight">Así suena con Naran</h2>
+            </div>
 
-      {/* Dots */}
-      <div className="flex gap-2 mb-8">
-        {SLIDES.map((_, i) => (
-          <div
-            key={i}
-            className="rounded-full transition-all duration-300"
-            style={{
-              width: i === step ? 20 : 6,
-              height: 6,
-              background: i === step ? '#E07A5F' : '#E07A5F44',
-            }}
-          />
-        ))}
-      </div>
+            {/* Original crossed out */}
+            <div className="w-full rounded-2xl px-4 py-3" style={{ background: 'rgba(255,255,255,0.05)' }}>
+              <p className="text-sm text-white/30 line-through leading-relaxed">
+                "{text.trim() || EXAMPLE}"
+              </p>
+            </div>
 
-      {/* Button */}
-      <button
-        onClick={handleNext}
-        className="w-full h-14 rounded-2xl text-white text-base font-medium flex items-center justify-center gap-2 shadow-lg"
-        style={{ background: '#E07A5F', boxShadow: '0 8px 24px rgba(224,122,95,0.25)' }}
-      >
-        {isLast ? 'Comenzar' : 'Siguiente'}
-        <ArrowRight className="w-4 h-4" />
-      </button>
+            {/* Reframed */}
+            <div className="w-full rounded-2xl px-5 py-5 border border-white/10"
+              style={{ background: 'rgba(224,122,95,0.12)' }}>
+              <p className="text-lg text-white leading-relaxed tracking-wide">{reframe}</p>
+            </div>
+
+            <button
+              onClick={handleDone}
+              className="w-full h-14 rounded-2xl text-white text-base font-medium transition-all"
+              style={{ background: '#E07A5F', boxShadow: '0 8px 24px rgba(224,122,95,0.35)' }}
+            >
+              Entendido. Quiero esto en mi vida.
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

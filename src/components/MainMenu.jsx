@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Menu, X, History, BookOpen, LogOut, User } from 'lucide-react';
+import { Menu, X, History, BookOpen, LogOut, User, Library } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 
@@ -45,7 +45,7 @@ export default function MainMenu({ user }) {
             >
               {/* Header */}
               <div className="flex items-center justify-between px-5 pt-10 pb-6">
-                <span className="text-xl font-semibold text-foreground">🍊 Naran</span>
+                <span className="text-xl font-semibold text-foreground tracking-tight">naran</span>
                 <button onClick={() => setOpen(false)} className="w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground">
                   <X className="w-4 h-4" />
                 </button>
@@ -68,8 +68,9 @@ export default function MainMenu({ user }) {
 
               {/* Menu items */}
               <div className="flex-1 px-3 py-4 space-y-1">
-                <MenuItem icon={History} label="Historial completo" onClick={() => go('/historial')} />
-                <MenuItem icon={BookOpen} label="Biblioteca de recursos" onClick={() => go('/recursos')} />
+                <MenuItem icon={History} label="Historial" onClick={() => go('/historial')} />
+                <MenuItem icon={BookOpen} label="Biblioteca de calma" onClick={() => go('/recursos')} />
+                <MenuItem icon={User} label="Mi perfil" onClick={() => go('/profile')} />
               </div>
 
               {/* Logout */}

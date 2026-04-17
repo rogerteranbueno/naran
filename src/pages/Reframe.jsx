@@ -1,11 +1,27 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Lightbulb, Copy, Check, Loader2 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { ArrowLeft, BookmarkPlus, Share2, Check, ChevronDown, ChevronUp } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
-import GottmanPill from '@/components/GottmanPill';
 
-async function saveConflictLog({ original_text, cognitive_note, reframe_message, action_taken, emotion_label }) {
+const GOTTMAN_TIPS = {
+  'crítica': 'Inicio suave: habla de TU sentimiento, no del defecto del otro.',
+  'desprecio': 'Cultura de apreciación: busca lo que valoras en el otro.',
+  'defensividad': 'Asume un 5% de responsabilidad. Solo uno.',
+  'evasión': 'Pide una pausa de 20 minutos. Vuelve cuando el sistema nervioso se calme.',
+  'generalización': 'Habla del comportamiento específico, no del patrón eterno.',
+  'inicio duro': 'Empieza con "Yo siento…" en lugar de "Tú siempre…"',
+};
+
+function getGottmanTip(note = '') {
+  const n = note.toLowerCase();
+  for (const [key, tip] of Object.entries(GOTTMAN_TIPS)) {
+    if (n.includes(key)) return tip;
+  }
+  return 'CNV: Observación + Sentimiento + Necesidad + Petición.';
+}
+
+async function saveLog({ original_text, cognitive_note, reframe_message, action_taken }) {
   const user = await base44.auth.me().catch(() => null);
   await base44.entities.ConflictLog.create({
     user_email: user?.email || '',
@@ -14,189 +30,198 @@ async function saveConflictLog({ original_text, cognitive_note, reframe_message,
     reframe_message,
     action_taken,
     status: 'pending',
-    ...(emotion_label ? { emotion_label } : {}),
   });
 }
 
 export default function Reframe() {
   const { state } = useLocation();
   const navigate = useNavigate();
-  const [copied, setCopied] = useState(false);
+  const [tipOpen, setTipOpen] = useState(false);
+  const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState(null);
 
   const originalText = state?.original_text || '';
   const cognitiveNote = state?.cognitive_note || '';
-  const emotionLabel = state?.emotion_label || null;
-  const [editedMessage, setEditedMessage] = useState(state?.reframe_message || '');
+  const [reframeMessage, setReframeMessage] = useState(state?.reframe_message || '');
+
+  const tip = getGottmanTip(cognitiveNote);
 
   const showToast = (msg) => {
     setToast(msg);
-    setTimeout(() => setToast(null), 3000);
-  };
-
-  const handleCopy = async () => {
-    await navigator.clipboard.writeText(editedMessage);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  const handleSend = async () => {
-    setSaving(true);
-    await navigator.clipboard.writeText(editedMessage).catch(() => {});
-    try {
-      await saveConflictLog({ original_text: originalText, cognitive_note: cognitiveNote, reframe_message: editedMessage, action_taken: 'sent', emotion_label: emotionLabel });
-    } catch {
-      showToast('No se pudo guardar. Revisa tu conexión.');
-      setSaving(false);
-      return;
-    }
-    if (navigator.share) {
-      navigator.share({ text: editedMessage }).catch(() => {});
-    } else {
-      window.open(`whatsapp://send?text=${encodeURIComponent(editedMessage)}`);
-    }
-    showToast('¡Copiado! Pégalo en tu chat.');
-    setSaving(false);
+    setTimeout(() => setToast(null), 2500);
   };
 
   const handleSave = async () => {
     setSaving(true);
-    try {
-      await saveConflictLog({ original_text: originalText, cognitive_note: cognitiveNote, reframe_message: editedMessage, action_taken: 'saved', emotion_label: emotionLabel });
-    } catch {
-      showToast('No se pudo guardar. Revisa tu conexión.');
-      setSaving(false);
-      return;
-    }
-    showToast('Momento guardado en tu historial.');
-    setTimeout(() => navigate('/app'), 1200);
+    await saveLog({ original_text: originalText, cognitive_note: cognitiveNote, reframe_message: reframeMessage, action_taken: 'saved' });
+    setSaved(true);
     setSaving(false);
+    showToast('Guardado en tu historial ✓');
+    setTimeout(() => navigate('/home'), 1400);
   };
 
-  return (
-    <div className="flex-1 flex flex-col px-5 py-8">
+  const handleShare = async () => {
+    if (navigator.share) {
+      await navigator.share({ text: reframeMessage }).catch(() => {});
+    } else {
+      await navigator.clipboard.writeText(reframeMessage);
+      showToast('Copiado al portapapeles ✓');
+    }
+    await saveLog({ original_text: originalText, cognitive_note: cognitiveNote, reframe_message: reframeMessage, action_taken: 'sent' }).catch(() => {});
+  };
 
-      {/* Top bar */}
-      <div className="flex items-center mb-8">
+  const handleDone = () => navigate('/home');
+
+  return (
+    <div className="flex-1 flex flex-col"
+      style={{ background: 'radial-gradient(ellipse at 50% 0%, rgba(224,122,95,0.10) 0%, #FDFBF7 65%)' }}>
+
+      {/* Header */}
+      <div className="flex items-center px-5 pt-10 pb-6">
         <button
-          onClick={() => navigate('/app')}
+          onClick={() => navigate('/home')}
           className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           <span className="text-sm">Volver</span>
         </button>
-        <p className="flex-1 text-center text-sm font-medium text-foreground mr-12">
-          Naran sugiere
-        </p>
       </div>
 
-      {/* Cognitive note badge */}
-      {cognitiveNote && (
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="flex items-start gap-3 rounded-2xl border border-border bg-background px-4 py-3 mb-6"
-        >
-          <Lightbulb className="w-4 h-4 text-primary mt-0.5 shrink-0" />
-          <p className="text-xs text-muted-foreground leading-relaxed">
-            <span className="text-foreground font-medium">Naran detectó: </span>
-            <span style={{ color: '#E07A5F' }}>{cognitiveNote}</span>
-          </p>
-        </motion.div>
-      )}
+      <div className="flex-1 flex flex-col px-5 pb-6 overflow-y-auto">
 
-      {/* Original text */}
-      {originalText && (
+        {/* Original (crossed out) */}
+        {originalText && (
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6"
+          >
+            <p className="text-xs text-muted-foreground/60 mb-2 uppercase tracking-wide font-medium">Lo que ibas a decir</p>
+            <div className="rounded-2xl px-4 py-3" style={{ background: '#F0EDE6' }}>
+              <p className="text-sm text-muted-foreground/60 leading-relaxed line-through italic">"{originalText}"</p>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Cognitive note */}
+        {cognitiveNote && (
+          <motion.div
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.08 }}
+            className="mb-5"
+          >
+            <button
+              onClick={() => setTipOpen(o => !o)}
+              className="flex items-center gap-1.5 text-xs text-primary/70 underline decoration-dotted underline-offset-2 hover:text-primary transition-colors"
+            >
+              ✨ ¿Por qué esto funciona? ·
+              {tipOpen ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+            </button>
+            <AnimatePresence>
+              {tipOpen && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="overflow-hidden"
+                >
+                  <div className="mt-2 rounded-xl px-4 py-3 border border-primary/15"
+                    style={{ background: 'rgba(224,122,95,0.06)' }}>
+                    <p className="text-xs text-foreground/80 leading-relaxed">
+                      <span className="font-medium text-primary">Naran detectó:</span> {cognitiveNote}. {tip}
+                    </p>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
+        )}
+
+        {/* Reframe message — editable */}
         <motion.div
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.15 }}
-          className="mb-6"
+          transition={{ delay: 0.12 }}
+          className="flex-1 mb-6"
         >
-          <p className="text-xs text-muted-foreground mb-2 font-medium uppercase tracking-wide">Dijiste:</p>
-          <div className="rounded-xl px-4 py-3" style={{ background: '#F3F1EB' }}>
-            <p className="text-sm text-foreground/60 leading-relaxed italic">"{originalText}"</p>
+          <p className="text-xs text-muted-foreground/60 mb-3 uppercase tracking-wide font-medium">Naran sugiere</p>
+          <div className="rounded-3xl bg-white border border-border/40 shadow-sm overflow-hidden">
+            <textarea
+              value={reframeMessage}
+              onChange={e => setReframeMessage(e.target.value)}
+              rows={5}
+              className="w-full resize-none px-5 pt-6 pb-4 text-xl leading-relaxed bg-transparent focus:outline-none tracking-wide"
+              style={{ color: '#2C2C2C' }}
+            />
+            <p className="px-5 pb-4 text-xs text-muted-foreground/35">Puedes editarlo antes de enviarlo</p>
           </div>
         </motion.div>
-      )}
+      </div>
 
-      {/* Reframe message — editable */}
+      {/* Bottom toolbar — iOS style */}
       <motion.div
-        initial={{ opacity: 0, y: 8 }}
+        initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-        className="mb-8 flex-1"
+        transition={{ delay: 0.25 }}
+        className="border-t border-border/40 bg-white/80 backdrop-blur-sm px-8 py-4 pb-8"
       >
-        <p className="text-sm font-semibold text-foreground mb-3">Prueba decir esto:</p>
-        <div className="relative rounded-2xl border border-border bg-white shadow-sm overflow-hidden">
-          <button
-            onClick={handleCopy}
-            className="absolute top-3 right-3 w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors z-10"
-          >
-            {copied ? <Check className="w-4 h-4 text-primary" /> : <Copy className="w-4 h-4" />}
-          </button>
-          <textarea
-            value={editedMessage}
-            onChange={e => setEditedMessage(e.target.value)}
-            rows={4}
-            className="w-full resize-none px-5 pt-5 pb-4 pr-12 text-lg leading-relaxed bg-transparent focus:outline-none"
-            style={{ color: '#2C2C2C' }}
+        <div className="flex items-center justify-around">
+          {/* Save */}
+          <ToolbarButton
+            icon={<BookmarkPlus className="w-5 h-5" />}
+            label="Guardar"
+            onClick={handleSave}
+            loading={saving}
+            done={saved}
           />
-          <p className="px-5 pb-3 text-xs text-muted-foreground/50">Puedes editar el mensaje antes de enviarlo</p>
+          {/* Share */}
+          <ToolbarButton
+            icon={<Share2 className="w-5 h-5" />}
+            label="Compartir"
+            onClick={handleShare}
+          />
+          {/* Done */}
+          <ToolbarButton
+            icon={<Check className="w-5 h-5" />}
+            label="Hecho"
+            onClick={handleDone}
+            accent
+          />
         </div>
       </motion.div>
 
-      {/* Gottman Pill */}
-      <GottmanPill cognitiveNote={cognitiveNote} />
-
-      {/* Action buttons */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
-        className="flex flex-col gap-3 mb-6"
-      >
-        <button
-          onClick={handleSend}
-          disabled={saving}
-          className="w-full h-14 rounded-2xl text-white text-base font-medium flex items-center justify-center gap-2 shadow-lg transition-all disabled:opacity-60"
-          style={{ background: '#E07A5F', boxShadow: '0 8px 24px rgba(224,122,95,0.25)' }}
-        >
-          {saving
-            ? <Loader2 className="w-5 h-5 animate-spin" />
-            : copied
-              ? <><Check className="w-5 h-5" /> ¡Copiado!</>
-              : 'Enviar mensaje'
-          }
-        </button>
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          className="w-full h-14 rounded-2xl text-base font-medium flex items-center justify-center gap-2 border-2 transition-opacity disabled:opacity-60"
-          style={{ borderColor: '#E07A5F', color: '#E07A5F', background: 'transparent' }}
-        >
-          {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Guardar para después'}
-        </button>
-      </motion.div>
-
-      {/* Footer note */}
-      <p className="text-center text-xs text-muted-foreground/60 pb-2">
-        Tú decides si usarlo. Naran solo sugiere.
-      </p>
-
       {/* Toast */}
-      {toast && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0 }}
-          className="fixed bottom-8 left-1/2 -translate-x-1/2 bg-foreground text-background text-sm px-5 py-3 rounded-2xl shadow-xl z-50 whitespace-nowrap"
-        >
-          {toast}
-        </motion.div>
-      )}
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            className="fixed bottom-28 left-1/2 -translate-x-1/2 bg-foreground text-background text-sm px-5 py-3 rounded-2xl shadow-xl z-50 whitespace-nowrap"
+          >
+            {toast}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
+  );
+}
+
+function ToolbarButton({ icon, label, onClick, loading, done, accent }) {
+  return (
+    <button
+      onClick={onClick}
+      disabled={loading}
+      className="flex flex-col items-center gap-1.5 transition-all disabled:opacity-40 active:scale-90"
+      style={{ color: accent ? '#E07A5F' : undefined }}
+    >
+      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors ${accent ? '' : 'text-muted-foreground hover:text-foreground hover:bg-secondary/60'}`}
+        style={accent ? { background: 'rgba(224,122,95,0.12)', color: '#E07A5F' } : {}}>
+        {loading ? <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" /> : done ? <Check className="w-5 h-5 text-green-500" /> : icon}
+      </div>
+      <span className="text-[10px] font-medium">{label}</span>
+    </button>
   );
 }
