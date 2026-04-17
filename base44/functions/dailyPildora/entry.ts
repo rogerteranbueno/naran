@@ -20,12 +20,8 @@ const PILDORAS = [
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
 
-    if (user?.role !== 'admin') {
-      return Response.json({ error: 'Forbidden' }, { status: 403 });
-    }
-
+    // This function runs as a scheduled automation — no user auth needed.
     // Get all users who have opted in to pildoras
     const users = await base44.asServiceRole.entities.User.list();
     const optedIn = users.filter(u => u.pildoras_enabled);
