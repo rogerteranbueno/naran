@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, LogOut, BookOpen, Clock, Trash2, Pencil, Check, X } from 'lucide-react';
+import { ArrowLeft, LogOut, BookOpen, Clock, Trash2, Pencil, Check, X, Bell, BellOff } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
+import BadgesSection from '@/components/BadgesSection';
 
 const AVATARS = ['🍊', '🌿', '🏔️', '🌊', '🌸', '🌙'];
 
@@ -21,15 +22,20 @@ export default function Profile() {
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
   const [avatar, setAvatar] = useState('🍊');
   const [weeklyGoal, setWeeklyGoal] = useState('');
+  const [pildorasEnabled, setPildorasEnabled] = useState(false);
+  const [allLogs, setAllLogs] = useState([]);
+  const [streak, setStreak] = useState(0);
 
   useEffect(() => {
     base44.auth.me().then(u => {
       setUser(u);
       setAvatar(u?.avatar || '🍊');
       setWeeklyGoal(u?.weekly_goal || '');
+      setPildorasEnabled(u?.pildoras_enabled || false);
     }).catch(() => {});
     const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-    base44.entities.ConflictLog.list('-created_date', 50).then(logs => {
+    base44.entities.ConflictLog.list('-created_date', 100).then(logs => {
+      setAllLogs(logs);
       const recent = logs.filter(l => l.created_date > oneWeekAgo);
       setWeeklyCount(recent.length);
       if (recent.length > 0) {
@@ -39,6 +45,19 @@ export default function Profile() {
         else if (notes.includes('ansiedad') || notes.includes('preocup')) setWeeklyPattern('Calma antes de hablar');
         else setWeeklyPattern('Comunicación empática');
       }
+      // Calc streak
+      let count = 0;
+      const checked = new Set();
+      for (const log of logs) {
+        const ds = new Date(log.created_date).toDateString();
+        if (checked.has(ds)) continue;
+        checked.add(ds);
+        const expected = new Date();
+        expected.setDate(expected.getDate() - count);
+        if (ds === expected.toDateString()) count++;
+        else break;
+      }
+      setStreak(count);
     }).catch(() => {});
   }, []);
 
@@ -52,6 +71,12 @@ export default function Profile() {
     setWeeklyGoal(goalDraft);
     setEditingGoal(false);
     await base44.auth.updateMe({ weekly_goal: goalDraft }).catch(() => {});
+  };
+
+  const togglePildoras = async () => {
+    const next = !pildorasEnabled;
+    setPildorasEnabled(next);
+    await base44.auth.updateMe({ pildoras_enabled: next }).catch(() => {});
   };
 
   return (
@@ -167,13 +192,52 @@ export default function Profile() {
           )}
         </motion.div>
 
+        {/* Badges */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.14 }}
+        >
+          <BadgesSection logs={allLogs} streak={streak} />
+        </motion.div>
+
+        {/* Píldoras de Calma toggle */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.18 }}
+          className="bg-white rounded-3xl px-5 py-4 shadow-sm border border-border/40 flex items-center justify-between"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center"
+              style={{ background: pildorasEnabled ? 'rgba(224,122,95,0.12)' : 'rgba(0,0,0,0.04)' }}>
+              {pildorasEnabled ? <Bell className="w-4 h-4 text-primary" /> : <BellOff className="w-4 h-4 text-muted-foreground" />}
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-foreground">Píldoras de Calma</p>
+              <p className="text-xs text-muted-foreground">Frases diarias de CNV por email</p>
+            </div>
+          </div>
+          <button
+            onClick={togglePildoras}
+            className="relative w-11 h-6 rounded-full transition-colors duration-200 shrink-0"
+            style={{ background: pildorasEnabled ? '#E07A5F' : '#D1D5DB' }}
+          >
+            <span
+              className="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform duration-200"
+              style={{ transform: pildorasEnabled ? 'translateX(20px)' : 'translateX(0)' }}
+            />
+          </button>
+        </motion.div>
+
         {/* Biblioteca */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.16 }}
+          transition={{ delay: 0.22 }}
         >
           <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3 px-1">Biblioteca de calma</p>
+
           <div className="space-y-3">
             <LibraryCard
               emoji="🕊️"
