@@ -80,8 +80,20 @@ export default function Historial() {
   };
 
   const onTouchEnd = () => {
-    if (pullY >= PULL_THRESHOLD) handleRefresh();
-    setPullY(0);
+    if (pullY >= PULL_THRESHOLD) {
+      handleRefresh();
+    } else {
+      // Spring-back physics
+      let current = pullY;
+      const interval = setInterval(() => {
+        current *= 0.92; // Damping
+        setPullY(current);
+        if (current < 0.5) {
+          clearInterval(interval);
+          setPullY(0);
+        }
+      }, 16);
+    }
   };
 
   return (
@@ -118,7 +130,7 @@ export default function Historial() {
 
       <div
         ref={scrollRef}
-        className="flex-1 overflow-y-auto px-5 pb-10"
+        className="flex-1 overflow-y-auto px-5 pb-10 touch-none"
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
@@ -136,13 +148,13 @@ export default function Historial() {
             <div className="flex flex-col divide-y divide-border rounded-2xl border border-border overflow-hidden bg-white">
               {logs.map((log, i) => (
                 <motion.button
-                  key={log.id}
-                  initial={{ opacity: 0, y: 4 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.03 }}
-                  onClick={() => navigate(`/log/${log.id}`, { state: log })}
-                  className="flex items-center gap-3 px-4 py-3 text-left hover:bg-secondary/40 transition-colors"
-                >
+                   key={log.id}
+                   initial={{ opacity: 0, y: 4 }}
+                   animate={{ opacity: 1, y: 0 }}
+                   transition={{ delay: i * 0.03 }}
+                   onClick={() => navigate(`/log/${log.id}`, { state: log })}
+                   className="flex items-center gap-3 px-4 py-3 text-left hover:bg-secondary/40 transition-colors touch-none select-none"
+                 >
                   <span className="text-xl shrink-0">{getEmoji(log.cognitive_note)}</span>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm text-foreground truncate">
@@ -165,7 +177,7 @@ export default function Historial() {
             {logs.length < total && (
               <button
                 onClick={loadMore}
-                className="mt-4 w-full py-3 text-sm text-primary font-medium rounded-2xl border border-border hover:bg-secondary/40 transition-colors"
+                className="mt-4 w-full py-3 text-sm text-primary font-medium rounded-2xl border border-border hover:bg-secondary/40 transition-colors touch-none select-none"
               >
                 Cargar más
               </button>

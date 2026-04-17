@@ -1,12 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { User, Pencil } from 'lucide-react';
+import { Pencil } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import useSpeechInput from '@/hooks/useSpeechInput';
 import OrangeMicButton from '@/components/OrangeMicButton';
 import MicPermissionCard from '@/components/MicPermissionCard';
-import MainMenu from '@/components/MainMenu';
 import Onboarding from '@/components/Onboarding';
 import StreakCounter from '@/components/StreakCounter';
 import TestimonialWall from '@/components/TestimonialWall';
@@ -129,17 +128,8 @@ export default function Home() {
       style={{ background: 'radial-gradient(ellipse at 50% 40%, rgba(224,122,95,0.18) 0%, #FDFBF7 68%)' }}>
 
       {/* Top bar */}
-      <div className="flex items-center justify-between px-5 pt-10 pb-4">
-        <MainMenu />
-        <div className="flex items-center gap-2">
-          <StreakCounter />
-          <button
-            onClick={() => navigate('/profile')}
-            className="w-9 h-9 rounded-full bg-white/70 border border-border flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors shadow-sm"
-          >
-            <User className="w-4 h-4" />
-          </button>
-        </div>
+      <div className="flex items-center justify-center px-5 pt-10 pb-4">
+        <StreakCounter />
       </div>
 
       {/* Central area */}
@@ -156,13 +146,11 @@ export default function Home() {
 
         {/* Mic button */}
         {browserSupported && (
-          <div className="flex flex-col items-center gap-4">
+          <div className="flex flex-col items-center gap-4 touch-none select-none">
             <OrangeMicButton
               isListening={listening}
               onTap={handleMicToggle}
             />
-            {/* Tap-to-record toggle */}
-
           </div>
         )}
 
@@ -231,7 +219,7 @@ export default function Home() {
               {!showText ? (
                 <button
                   onClick={handleShowText}
-                  className="flex items-center gap-2 mx-auto text-xs text-muted-foreground/50 hover:text-muted-foreground transition-colors"
+                  className="flex items-center gap-2 mx-auto text-xs text-muted-foreground/50 hover:text-muted-foreground transition-colors touch-none select-none"
                 >
                   <Pencil className="w-3 h-3" />
                   Prefiero escribirlo
@@ -255,7 +243,7 @@ export default function Home() {
                       initial={{ opacity: 0, scale: 0.9 }}
                       animate={{ opacity: 1, scale: 1 }}
                       onClick={() => goToReframe(text)}
-                      className="mt-3 w-full h-12 rounded-2xl text-white text-sm font-medium shadow-md transition-all"
+                      className="mt-3 w-full h-12 rounded-2xl text-white text-sm font-medium shadow-md transition-all touch-none select-none"
                       style={{ background: '#E07A5F', boxShadow: '0 6px 20px rgba(224,122,95,0.3)' }}
                     >
                       Reencuadrar mensaje

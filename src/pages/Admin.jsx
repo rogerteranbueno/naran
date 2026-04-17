@@ -21,13 +21,17 @@ export default function Admin() {
   }, []);
 
   const approve = async (id) => {
-    await base44.entities.Testimonial.update(id, { is_approved: true });
+    // Optimistic UI: remove immediately
     setTestimonials(prev => prev.filter(t => t.id !== id));
+    // Then confirm with backend
+    await base44.entities.Testimonial.update(id, { is_approved: true });
   };
 
   const reject = async (id) => {
-    await base44.entities.Testimonial.delete(id);
+    // Optimistic UI: remove immediately
     setTestimonials(prev => prev.filter(t => t.id !== id));
+    // Then confirm with backend
+    await base44.entities.Testimonial.delete(id);
   };
 
   if (loading) return (
@@ -39,7 +43,7 @@ export default function Admin() {
   return (
     <div className="flex-1 flex flex-col bg-background">
       <div className="flex items-center px-5 pt-10 pb-5">
-        <button onClick={() => navigate('/home')} className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors">
+        <button onClick={() => navigate('/home')} className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors touch-none select-none">
           <ArrowLeft className="w-4 h-4" />
           <span className="text-sm">Volver</span>
         </button>
@@ -56,12 +60,12 @@ export default function Admin() {
               <p className="text-sm text-foreground leading-relaxed mb-3 italic">"{t.content}"</p>
               <div className="flex gap-2">
                 <button onClick={() => approve(t.id)}
-                  className="flex-1 h-9 rounded-xl flex items-center justify-center gap-1.5 text-xs font-medium text-green-700"
+                  className="flex-1 h-9 rounded-xl flex items-center justify-center gap-1.5 text-xs font-medium text-green-700 touch-none select-none"
                   style={{ background: 'rgba(34,197,94,0.10)' }}>
                   <Check className="w-3.5 h-3.5" /> Aprobar
                 </button>
                 <button onClick={() => reject(t.id)}
-                  className="flex-1 h-9 rounded-xl flex items-center justify-center gap-1.5 text-xs font-medium text-red-600"
+                  className="flex-1 h-9 rounded-xl flex items-center justify-center gap-1.5 text-xs font-medium text-red-600 touch-none select-none"
                   style={{ background: 'rgba(239,68,68,0.08)' }}>
                   <X className="w-3.5 h-3.5" /> Rechazar
                 </button>
