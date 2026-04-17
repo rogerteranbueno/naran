@@ -157,6 +157,15 @@ export default function Home() {
               isListening={listening}
               onPressStart={() => { resetTranscript(); startListening(); }}
               onPressEnd={handleMicRelease}
+              onTap={() => {
+                if (listening) {
+                  handleMicRelease();
+                } else {
+                  resetTranscript();
+                  startListening();
+                  setTapMode(true);
+                }
+              }}
             />
             {/* Tap-to-record toggle */}
             {!listening ? (

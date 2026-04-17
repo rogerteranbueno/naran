@@ -1,9 +1,10 @@
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 
-export default function OrangeMicButton({ isListening, onPressStart, onPressEnd }) {
+export default function OrangeMicButton({ isListening, onPressStart, onPressEnd, onTap }) {
   const [pressed, setPressed] = useState(false);
   const [seconds, setSeconds] = useState(0);
+  const pressStartTime = useState(null);
 
   useEffect(() => {
     if (!isListening) { setSeconds(0); return; }
@@ -14,6 +15,7 @@ export default function OrangeMicButton({ isListening, onPressStart, onPressEnd 
   const handlePointerDown = (e) => {
     e.preventDefault();
     setPressed(true);
+    pressStartTime[1](Date.now());
     onPressStart?.();
   };
 
@@ -21,7 +23,13 @@ export default function OrangeMicButton({ isListening, onPressStart, onPressEnd 
     e.preventDefault();
     if (!pressed) return;
     setPressed(false);
-    onPressEnd?.();
+    const held = Date.now() - (pressStartTime[0] || Date.now());
+    if (held < 300) {
+      // Tap rápido — delegar al padre como toggle
+      onTap?.();
+    } else {
+      onPressEnd?.();
+    }
   };
 
   return (
