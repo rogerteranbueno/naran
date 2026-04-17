@@ -39,6 +39,7 @@ export default function Home() {
   const textareaRef = useRef(null);
 
   const [showOnboarding, setShowOnboarding] = useState(!localStorage.getItem('naran_onboarded'));
+  const [tapMode, setTapMode] = useState(false);
 
   const { transcript, listening, startListening, stopListening, resetTranscript, browserSupported, error: micError } = useSpeechInput();
 
@@ -73,6 +74,7 @@ export default function Home() {
   };
 
   const handleMicRelease = () => {
+    setTapMode(false);
     stopListening();
     setTimeout(() => {
       const current = text.trim();
@@ -150,11 +152,31 @@ export default function Home() {
 
         {/* Mic button */}
         {browserSupported && (
-          <OrangeMicButton
-            isListening={listening}
-            onPressStart={() => { resetTranscript(); startListening(); }}
-            onPressEnd={handleMicRelease}
-          />
+          <div className="flex flex-col items-center gap-4">
+            <OrangeMicButton
+              isListening={listening}
+              onPressStart={() => { resetTranscript(); startListening(); }}
+              onPressEnd={handleMicRelease}
+            />
+            {/* Tap-to-record toggle */}
+            {!listening ? (
+              <button
+                onClick={() => { resetTranscript(); startListening(); setTapMode(true); }}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs text-muted-foreground/50 hover:text-muted-foreground border border-border/40 bg-white/60 transition-colors"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/40" />
+                Toca para grabar
+              </button>
+            ) : tapMode ? (
+              <button
+                onClick={() => { setTapMode(false); handleMicRelease(); }}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border border-red-200 bg-red-50 text-red-500 transition-colors animate-pulse"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-red-400" />
+                Toca para parar
+              </button>
+            ) : null}
+          </div>
         )}
 
         {/* Listening transcript preview */}
