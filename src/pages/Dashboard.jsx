@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LogOut } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
@@ -77,6 +77,7 @@ export default function Dashboard() {
   const [pendingMicAction, setPendingMicAction] = useState(false); // true = mic, false = text
   const [emotionLabel, setEmotionLabel] = useState(null);
   const [followUpLog, setFollowUpLog] = useState(null);
+  const pendingTextRef = useRef(null); // texto guardado para analizar tras selección de emoción
 
   const { listening, transcript, error, startListening, stopListening, resetTranscript, browserSupported } = useSpeechInput();
 
@@ -129,6 +130,12 @@ export default function Dashboard() {
       startMicAfterEmotion();
     } else {
       setShowEmotionSelector(false);
+      // Si había texto pendiente, analizar ahora con la emoción seleccionada
+      if (pendingTextRef.current) {
+        const txt = pendingTextRef.current;
+        pendingTextRef.current = null;
+        handleAnalyzeWithEmotion(txt, emotion);
+      }
     }
   };
 
@@ -138,6 +145,12 @@ export default function Dashboard() {
       startMicAfterEmotion();
     } else {
       setShowEmotionSelector(false);
+      // Si había texto pendiente, analizar sin emoción
+      if (pendingTextRef.current) {
+        const txt = pendingTextRef.current;
+        pendingTextRef.current = null;
+        handleAnalyzeWithEmotion(txt, null);
+      }
     }
   };
 
@@ -151,20 +164,25 @@ export default function Dashboard() {
     }
   }, [listening]);
 
-  const handleAnalyze = async (inputText) => {
-    const content = (inputText ?? text).trim();
+  const handleAnalyzeWithEmotion = async (content, emotion) => {
     if (!content) return;
     setAnalyzing(true);
-    const prompt = emotionLabel
-      ? `El usuario reporta sentirse: ${emotionLabel}. Su mensaje: "${content}"`
+    const prompt = emotion
+      ? `El usuario reporta sentirse: ${emotion}. Su mensaje: "${content}"`
       : content;
     const result = await analyzeConflict(prompt);
-    result.emotion_label = emotionLabel;
+    result.emotion_label = emotion;
     navigate('/reframe', { state: result });
+  };
+
+  const handleAnalyze = async (inputText) => {
+    const content = (inputText ?? text).trim();
+    handleAnalyzeWithEmotion(content, emotionLabel);
   };
 
   const handleAnalyzeFromText = () => {
     if (!text.trim()) return;
+    pendingTextRef.current = text.trim(); // guardar texto antes de mostrar selector
     setPendingMicAction(false);
     setShowEmotionSelector(true);
   };
