@@ -40,14 +40,14 @@ export default function Home() {
 
   const { transcript, listening, startListening, stopListening, resetTranscript, browserSupported, error: micError } = useSpeechInput();
 
-  if (showOnboarding) {
-    return <Onboarding onDone={() => setShowOnboarding(false)} />;
-  }
-
-  // Sync speech transcript
+  // Sync speech transcript — must be before any early return
   useEffect(() => {
     if (transcript) setText(transcript);
   }, [transcript]);
+
+  if (showOnboarding) {
+    return <Onboarding onDone={() => setShowOnboarding(false)} />;
+  }
 
   const goToReframe = async (inputText) => {
     const trimmed = inputText.trim();
