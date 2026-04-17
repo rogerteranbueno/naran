@@ -184,7 +184,7 @@ export default function Reframe() {
               className="w-full resize-none px-5 pt-6 pb-4 text-xl leading-relaxed bg-transparent focus:outline-none tracking-wide"
               style={{ color: '#2C2C2C' }}
             />
-            <p className="px-5 pb-4 text-xs text-muted-foreground/35">Puedes editarlo antes de enviarlo</p>
+            <p className="px-5 pb-4 text-xs text-muted-foreground/50">✏️ Toca el texto para editarlo antes de enviarlo</p>
           </div>
         </motion.div>
       </div>

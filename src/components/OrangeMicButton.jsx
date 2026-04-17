@@ -1,9 +1,15 @@
 import { motion } from 'framer-motion';
-import { Mic } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function OrangeMicButton({ isListening, onPressStart, onPressEnd }) {
   const [pressed, setPressed] = useState(false);
+  const [seconds, setSeconds] = useState(0);
+
+  useEffect(() => {
+    if (!isListening) { setSeconds(0); return; }
+    const interval = setInterval(() => setSeconds(s => s + 1), 1000);
+    return () => clearInterval(interval);
+  }, [isListening]);
 
   const handlePointerDown = (e) => {
     e.preventDefault();
@@ -65,20 +71,28 @@ export default function OrangeMicButton({ isListening, onPressStart, onPressEnd 
             : '0 8px 32px rgba(224,122,95,0.35), 0 2px 8px rgba(224,122,95,0.2)',
         }}
       >
-        {/* Orange emoji or mic icon */}
+        {/* Orange emoji or recording state */}
         {isListening ? (
-          <div className="flex flex-col items-center gap-1">
-            <div className="flex gap-1 items-end h-7">
+          <div className="flex flex-col items-center gap-1.5">
+            {/* Timer */}
+            <div className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
+              <span className="text-white font-semibold text-sm tabular-nums">
+                {String(Math.floor(seconds / 60)).padStart(2, '0')}:{String(seconds % 60).padStart(2, '0')}
+              </span>
+            </div>
+            {/* Bars */}
+            <div className="flex gap-1 items-end h-5">
               {[0, 0.15, 0.3, 0.15, 0].map((delay, i) => (
                 <motion.div
                   key={i}
                   className="w-1 rounded-full bg-white/90"
-                  animate={{ height: ['8px', '24px', '8px'] }}
+                  animate={{ height: ['6px', '18px', '6px'] }}
                   transition={{ duration: 0.8, repeat: Infinity, delay, ease: 'easeInOut' }}
                 />
               ))}
             </div>
-            <span className="text-white/70 text-[10px] mt-1">Suelta para procesar</span>
+            <span className="text-white/70 text-[9px]">Suelta para procesar</span>
           </div>
         ) : (
           <div className="flex flex-col items-center gap-1.5">
