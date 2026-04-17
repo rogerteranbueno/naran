@@ -8,7 +8,7 @@ import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 
 import MobileLayout from '@/components/MobileLayout';
 import Welcome from '@/pages/Welcome';
-import Dashboard from '@/pages/Dashboard';
+import Dashboard from '@/pages/Dashboard.jsx';
 import Reframe from '@/pages/Reframe';
 import LogDetail from '@/pages/LogDetail';
 import Historial from '@/pages/Historial';
