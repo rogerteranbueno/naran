@@ -8,6 +8,7 @@ import OrangeMicButton from '@/components/OrangeMicButton';
 import MicPermissionCard from '@/components/MicPermissionCard';
 import MainMenu from '@/components/MainMenu';
 import Onboarding from '@/components/Onboarding';
+import StreakCounter from '@/components/StreakCounter';
 
 const AGGRESSIVE_RE = /\b(eres\s+un[a]?\s+\w+)\b/i;
 
@@ -123,12 +124,15 @@ export default function Home() {
       {/* Top bar */}
       <div className="flex items-center justify-between px-5 pt-10 pb-4">
         <MainMenu />
-        <button
-          onClick={() => navigate('/profile')}
-          className="w-9 h-9 rounded-full bg-white/70 border border-border flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors shadow-sm"
-        >
-          <User className="w-4 h-4" />
-        </button>
+        <div className="flex items-center gap-2">
+          <StreakCounter />
+          <button
+            onClick={() => navigate('/profile')}
+            className="w-9 h-9 rounded-full bg-white/70 border border-border flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors shadow-sm"
+          >
+            <User className="w-4 h-4" />
+          </button>
+        </div>
       </div>
 
       {/* Central area */}

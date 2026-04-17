@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, RefreshCw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
+import WeeklyChart from '@/components/WeeklyChart';
 
 function timeAgo(dateStr) {
   const diffMs = Date.now() - new Date(dateStr).getTime();
@@ -122,6 +123,8 @@ export default function Historial() {
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
       >
+        {!loading && logs.length > 0 && <WeeklyChart logs={logs} />}
+
         {loading ? (
           <div className="flex justify-center pt-16">
             <div className="w-5 h-5 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />

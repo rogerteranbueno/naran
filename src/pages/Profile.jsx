@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, LogOut, BookOpen, Clock, Trash2 } from 'lucide-react';
+import { ArrowLeft, LogOut, BookOpen, Clock, Trash2, Pencil, Check, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
+
+const AVATARS = ['🍊', '🌿', '🏔️', '🌊', '🌸', '🌙'];
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -13,8 +15,19 @@ export default function Profile() {
   const [deleteConfirm, setDeleteConfirm] = useState('');
   const [deleting, setDeleting] = useState(false);
 
+  // Editable profile state
+  const [editingGoal, setEditingGoal] = useState(false);
+  const [goalDraft, setGoalDraft] = useState('');
+  const [showAvatarPicker, setShowAvatarPicker] = useState(false);
+  const [avatar, setAvatar] = useState('🍊');
+  const [weeklyGoal, setWeeklyGoal] = useState('');
+
   useEffect(() => {
-    base44.auth.me().then(setUser).catch(() => {});
+    base44.auth.me().then(u => {
+      setUser(u);
+      setAvatar(u?.avatar || '🍊');
+      setWeeklyGoal(u?.weekly_goal || '');
+    }).catch(() => {});
     const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
     base44.entities.ConflictLog.list('-created_date', 50).then(logs => {
       const recent = logs.filter(l => l.created_date > oneWeekAgo);
@@ -28,6 +41,18 @@ export default function Profile() {
       }
     }).catch(() => {});
   }, []);
+
+  const saveAvatar = async (emoji) => {
+    setAvatar(emoji);
+    setShowAvatarPicker(false);
+    await base44.auth.updateMe({ avatar: emoji }).catch(() => {});
+  };
+
+  const saveGoal = async () => {
+    setWeeklyGoal(goalDraft);
+    setEditingGoal(false);
+    await base44.auth.updateMe({ weekly_goal: goalDraft }).catch(() => {});
+  };
 
   return (
     <div className="flex-1 flex flex-col"
@@ -45,21 +70,75 @@ export default function Profile() {
       </div>
 
       <div className="flex-1 px-5 pb-10 space-y-5">
-        {/* User info */}
+        {/* User info + avatar + goal */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-3xl px-5 py-5 shadow-sm border border-border/40"
+          className="bg-white rounded-3xl px-5 py-5 shadow-sm border border-border/40 space-y-4"
         >
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl"
-              style={{ background: 'rgba(224,122,95,0.12)' }}>
-              🍊
-            </div>
+            <button onClick={() => setShowAvatarPicker(p => !p)} className="relative shrink-0">
+              <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl"
+                style={{ background: 'rgba(224,122,95,0.12)' }}>
+                {avatar}
+              </div>
+              <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-primary flex items-center justify-center">
+                <Pencil className="w-2.5 h-2.5 text-white" />
+              </div>
+            </button>
             <div>
               <p className="font-semibold text-foreground">{user?.full_name || 'Usuario'}</p>
               <p className="text-xs text-muted-foreground">{user?.email || '...'}</p>
             </div>
+          </div>
+
+          {/* Avatar picker */}
+          <AnimatePresence>
+            {showAvatarPicker && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="overflow-hidden"
+              >
+                <div className="flex gap-2 pt-1">
+                  {AVATARS.map(em => (
+                    <button key={em} onClick={() => saveAvatar(em)}
+                      className={`w-10 h-10 rounded-xl text-xl flex items-center justify-center transition-all ${avatar === em ? 'ring-2 ring-primary' : 'hover:bg-secondary/60'}`}
+                      style={{ background: 'rgba(224,122,95,0.08)' }}>
+                      {em}
+                    </button>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Weekly goal */}
+          <div>
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">Meta de la semana</p>
+            {editingGoal ? (
+              <div className="flex gap-2 items-center">
+                <input
+                  autoFocus
+                  value={goalDraft}
+                  onChange={e => setGoalDraft(e.target.value)}
+                  onKeyDown={e => { if (e.key === 'Enter') saveGoal(); if (e.key === 'Escape') setEditingGoal(false); }}
+                  placeholder="Ej: Practicar la escucha activa"
+                  className="flex-1 text-sm rounded-xl border border-border px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                />
+                <button onClick={saveGoal} className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center"><Check className="w-3.5 h-3.5 text-white" /></button>
+                <button onClick={() => setEditingGoal(false)} className="w-7 h-7 rounded-lg bg-secondary flex items-center justify-center"><X className="w-3.5 h-3.5 text-muted-foreground" /></button>
+              </div>
+            ) : (
+              <button
+                onClick={() => { setGoalDraft(weeklyGoal); setEditingGoal(true); }}
+                className="flex items-center gap-2 text-sm text-foreground/80 hover:text-foreground transition-colors"
+              >
+                {weeklyGoal || <span className="text-muted-foreground italic">Añade tu meta semanal…</span>}
+                <Pencil className="w-3 h-3 text-muted-foreground shrink-0" />
+              </button>
+            )}
           </div>
         </motion.div>
 

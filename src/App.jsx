@@ -16,6 +16,7 @@ import LogDetail from '@/pages/LogDetail';
 import Historial from '@/pages/Historial';
 import Recursos from '@/pages/Recursos';
 import Profile from '@/pages/Profile';
+import Practica from '@/pages/Practica';
 
 // Sync .dark class with system preference
 function SystemThemeSync() {
@@ -77,6 +78,7 @@ const AuthenticatedApp = () => {
         <Route path="/historial" element={<AnimatedRoutes><Historial /></AnimatedRoutes>} />
         <Route path="/recursos" element={<AnimatedRoutes><Recursos /></AnimatedRoutes>} />
         <Route path="/profile" element={<AnimatedRoutes><Profile /></AnimatedRoutes>} />
+        <Route path="/practica" element={<AnimatedRoutes><Practica /></AnimatedRoutes>} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>
