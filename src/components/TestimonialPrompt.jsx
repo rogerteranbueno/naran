@@ -1,12 +1,37 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Send } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
+
+const TIMER_SECONDS = 30;
 
 export default function TestimonialPrompt({ onDismiss }) {
   const [text, setText] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [secondsLeft, setSecondsLeft] = useState(TIMER_SECONDS);
+
+  // Auto-cierre a los 30s solo si no está escribiendo
+  useEffect(() => {
+    if (submitted) return;
+    const interval = setInterval(() => {
+      setSecondsLeft(s => {
+        if (s <= 1) {
+          clearInterval(interval);
+          onDismiss?.();
+          return 0;
+        }
+        return s - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [submitted]);
+
+  // Si el usuario empieza a escribir, reinicia el timer a 30s
+  const handleChange = (e) => {
+    setText(e.target.value.slice(0, 200));
+    setSecondsLeft(TIMER_SECONDS);
+  };
 
   const submit = async () => {
     if (!text.trim() || submitting) return;
@@ -19,7 +44,7 @@ export default function TestimonialPrompt({ onDismiss }) {
       is_approved: false,
     });
     setSubmitted(true);
-    setTimeout(() => onDismiss?.(), 2000);
+    setTimeout(() => onDismiss?.(), 2500);
   };
 
   return (
@@ -34,14 +59,17 @@ export default function TestimonialPrompt({ onDismiss }) {
         <>
           <div className="flex items-start justify-between mb-2">
             <p className="text-xs font-semibold text-foreground">¿Te ayudó este reframe?</p>
-            <button onClick={onDismiss} className="text-muted-foreground/50 hover:text-muted-foreground">
-              <X className="w-3.5 h-3.5" />
-            </button>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] text-muted-foreground/40 tabular-nums">{secondsLeft}s</span>
+              <button onClick={onDismiss} className="text-muted-foreground/50 hover:text-muted-foreground">
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
           </div>
           <p className="text-xs text-muted-foreground mb-3 leading-relaxed">Comparte una frase anónima para inspirar a otros.</p>
           <textarea
             value={text}
-            onChange={e => setText(e.target.value.slice(0, 200))}
+            onChange={handleChange}
             placeholder="Ej: Me ayudó a ver que en realidad necesitaba ser escuchado…"
             rows={2}
             className="w-full resize-none text-xs rounded-xl border border-border/60 bg-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground/40"

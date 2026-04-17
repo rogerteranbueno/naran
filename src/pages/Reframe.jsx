@@ -73,8 +73,7 @@ export default function Reframe() {
     setSaved(true);
     setSaving(false);
     setShowTestimonialPrompt(true);
-    showToast('Guardado en tu historial ✓');
-    setTimeout(() => navigate('/home'), 3500);
+    showToast('Guardado en historial ✓');
   };
 
   const handleShare = async () => {
@@ -183,12 +182,7 @@ export default function Reframe() {
           transition={{ delay: 0.12 }}
           className="flex-1 mb-6"
         >
-          <div className="flex items-center justify-between mb-3">
-            <p className="text-xs text-muted-foreground/60 uppercase tracking-wide font-medium">Naran sugiere</p>
-            <span className="flex items-center gap-1 text-[10px] text-primary/60 font-medium">
-              <span>✏️</span> Toca para editar
-            </span>
-          </div>
+          <p className="text-xs text-muted-foreground/60 uppercase tracking-wide font-medium mb-3">Naran sugiere</p>
           <div className="rounded-3xl bg-white border-2 border-primary/20 shadow-sm overflow-hidden focus-within:border-primary/50 transition-colors">
             <textarea
               value={reframeMessage}
@@ -212,7 +206,7 @@ export default function Reframe() {
           {/* Save */}
           <ToolbarButton
             icon={<BookmarkPlus className="w-5 h-5" />}
-            label="Guardar"
+            label="Guardar en historial"
             onClick={handleSave}
             loading={saving}
             done={saved}
@@ -223,10 +217,10 @@ export default function Reframe() {
             label="Compartir"
             onClick={handleShare}
           />
-          {/* Done */}
+          {/* Done — solo usar el mensaje, sin guardar */}
           <ToolbarButton
             icon={<Check className="w-5 h-5" />}
-            label="Hecho"
+            label="Solo usar"
             onClick={handleDone}
             accent
           />
