@@ -192,7 +192,7 @@ export default function Reframe() {
               className="w-full resize-none px-5 pt-6 pb-4 text-xl leading-relaxed bg-transparent focus:outline-none tracking-wide"
               style={{ color: '#2C2C2C' }}
             />
-            <p className="px-5 pb-4 text-xs text-muted-foreground/50">✏️ Edita el texto arriba si quieres ajustarlo</p>
+            <p className="px-5 pb-4 text-xs text-muted-foreground/60">✏️ Puedes editar este mensaje antes de guardarlo o enviarlo</p>
           </div>
         </motion.div>
       </div>

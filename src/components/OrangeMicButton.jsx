@@ -59,7 +59,7 @@ export default function OrangeMicButton({ isListening, onPressStart, onPressEnd 
         onPointerDown={handlePointerDown}
         onPointerUp={handlePointerUp}
         onPointerLeave={handlePointerUp}
-        animate={{ scale: pressed ? 0.93 : 1 }}
+        animate={{ scale: pressed && !isListening ? 0.93 : 1 }}
         transition={{ type: 'spring', stiffness: 400, damping: 20 }}
         className="relative w-[140px] h-[140px] rounded-full flex items-center justify-center select-none touch-none"
         style={{
