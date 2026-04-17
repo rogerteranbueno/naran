@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Heart, Play, Headphones } from 'lucide-react';
+import { ArrowLeft, Heart, ExternalLink, Youtube } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
-import FloatingAudioPlayer from '@/components/FloatingAudioPlayer';
 
-const AUDIOS = [
+const RECURSOS = [
   {
     id: 'cnv-pilar-intro',
     category: 'Mini-lección CNV',
@@ -15,7 +14,6 @@ const AUDIOS = [
     emoji: '🕊️',
     color: 'rgba(224,122,95,0.10)',
     url: 'https://www.youtube.com/watch?v=ZjSuHfHF7F4',
-    type: 'youtube',
     desc: 'Introducción clara al método por la principal referente hispanohablante.',
   },
   {
@@ -27,7 +25,6 @@ const AUDIOS = [
     emoji: '🌬️',
     color: 'rgba(129,178,154,0.12)',
     url: 'https://www.youtube.com/watch?v=inpok4MKVLM',
-    type: 'youtube',
     desc: 'Respiración consciente para calmar la reactividad antes de una conversación difícil.',
   },
   {
@@ -39,7 +36,6 @@ const AUDIOS = [
     emoji: '🤲',
     color: 'rgba(224,122,95,0.08)',
     url: 'https://www.youtube.com/watch?v=l7TONauJGfc',
-    type: 'youtube',
     desc: 'La diferencia entre pedir y exigir, con ejemplos reales.',
   },
   {
@@ -51,7 +47,6 @@ const AUDIOS = [
     emoji: '💙',
     color: 'rgba(123,156,196,0.10)',
     url: 'https://www.youtube.com/watch?v=DbDoBzGY3vo',
-    type: 'youtube',
     desc: 'Regula el sistema nervioso antes de una conversación importante.',
   },
   {
@@ -63,19 +58,18 @@ const AUDIOS = [
     emoji: '⚠️',
     color: 'rgba(201,97,74,0.08)',
     url: 'https://www.youtube.com/watch?v=1o30Ps-_8is',
-    type: 'youtube',
     desc: 'Entiende los 4 patrones que predicen conflicto y sus antídotos.',
   },
 ];
+
+const CATEGORIES = ['Todos', 'Meditación', 'Mini-lección CNV'];
 
 export default function BibliotecaAuditiva() {
   const navigate = useNavigate();
   const [favorites, setFavorites] = useState([]);
   const [activeFilter, setActiveFilter] = useState('Todos');
-  const [activeAudio, setActiveAudio] = useState(null);
 
   useEffect(() => {
-    // Cargar favoritos: primero de User, fallback a localStorage
     base44.auth.me().then(u => {
       if (u?.favorite_audios?.length) {
         setFavorites(u.favorite_audios);
@@ -89,20 +83,17 @@ export default function BibliotecaAuditiva() {
     });
   }, []);
 
-  const toggleFavorite = async (id) => {
+  const toggleFavorite = async (e, id) => {
+    e.preventDefault();
+    e.stopPropagation();
     const next = favorites.includes(id) ? favorites.filter(f => f !== id) : [...favorites, id];
     setFavorites(next);
     localStorage.setItem('naran_audio_favs', JSON.stringify(next));
     base44.auth.updateMe({ favorite_audios: next }).catch(() => {});
   };
 
-  const openAudio = (audio) => {
-    setActiveAudio(audio);
-  };
-
-  const categories = ['Todos', 'Meditación', 'Mini-lección CNV'];
-  const filtered = activeFilter === 'Todos' ? AUDIOS : AUDIOS.filter(a => a.category === activeFilter);
-  const favAudios = AUDIOS.filter(a => favorites.includes(a.id));
+  const filtered = activeFilter === 'Todos' ? RECURSOS : RECURSOS.filter(a => a.category === activeFilter);
+  const favRecursos = RECURSOS.filter(a => favorites.includes(a.id));
 
   return (
     <div className="flex-1 flex flex-col" style={{ background: 'radial-gradient(ellipse at 50% 0%, rgba(224,122,95,0.10) 0%, #FDFBF7 65%)' }}>
@@ -111,15 +102,13 @@ export default function BibliotecaAuditiva() {
           <ArrowLeft className="w-4 h-4" />
           <span className="text-sm">Volver</span>
         </button>
-        <p className="flex-1 text-center text-sm font-medium text-foreground mr-12">Biblioteca Auditiva</p>
+        <p className="flex-1 text-center text-sm font-medium text-foreground mr-12">Biblioteca</p>
       </div>
-
-      <FloatingAudioPlayer audio={activeAudio} onClose={() => setActiveAudio(null)} />
 
       <div className="flex-1 overflow-y-auto px-5 pb-10 space-y-6">
         {/* Filtros */}
         <div className="flex gap-2">
-          {categories.map(cat => (
+          {CATEGORIES.map(cat => (
             <button key={cat} onClick={() => setActiveFilter(cat)}
               className="px-3 py-1.5 rounded-full text-xs font-medium transition-all"
               style={activeFilter === cat
@@ -131,12 +120,12 @@ export default function BibliotecaAuditiva() {
         </div>
 
         {/* Favoritos */}
-        {favAudios.length > 0 && activeFilter === 'Todos' && (
+        {favRecursos.length > 0 && activeFilter === 'Todos' && (
           <div>
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-3">Mis favoritos</p>
             <div className="space-y-3">
-              {favAudios.map((audio, i) => (
-                <AudioCard key={audio.id} audio={audio} isFav={true} onFav={toggleFavorite} onPlay={openAudio} index={i} />
+              {favRecursos.map((r, i) => (
+                <ResourceCard key={r.id} resource={r} isFav onFav={toggleFavorite} index={i} />
               ))}
             </div>
           </div>
@@ -147,12 +136,12 @@ export default function BibliotecaAuditiva() {
           {activeFilter !== 'Todos' && (
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-3">{activeFilter}</p>
           )}
-          {activeFilter === 'Todos' && favAudios.length > 0 && (
+          {activeFilter === 'Todos' && favRecursos.length > 0 && (
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-3">Todos</p>
           )}
           <div className="space-y-3">
-            {filtered.map((audio, i) => (
-              <AudioCard key={audio.id} audio={audio} isFav={favorites.includes(audio.id)} onFav={toggleFavorite} onPlay={openAudio} index={i} />
+            {filtered.map((r, i) => (
+              <ResourceCard key={r.id} resource={r} isFav={favorites.includes(r.id)} onFav={toggleFavorite} index={i} />
             ))}
           </div>
         </div>
@@ -161,36 +150,39 @@ export default function BibliotecaAuditiva() {
   );
 }
 
-function AudioCard({ audio, isFav, onFav, onPlay, index }) {
+function ResourceCard({ resource, isFav, onFav, index }) {
   return (
-    <motion.div
+    <motion.a
+      href={resource.url}
+      target="_blank"
+      rel="noopener noreferrer"
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05 }}
-      className="bg-white rounded-3xl px-4 py-4 border border-border/40 shadow-sm flex items-center gap-4"
+      className="bg-white rounded-3xl px-4 py-4 border border-border/40 shadow-sm flex items-center gap-4 hover:bg-secondary/20 transition-colors"
     >
-      <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shrink-0" style={{ background: audio.color }}>
-        {audio.emoji}
+      <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shrink-0" style={{ background: resource.color }}>
+        {resource.emoji}
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-0.5">{audio.category}</p>
-        <p className="text-sm font-semibold text-foreground leading-tight">{audio.title}</p>
-        <div className="flex items-center gap-2 mt-0.5">
-          <Headphones className="w-3 h-3 text-muted-foreground/50" />
-          <p className="text-xs text-muted-foreground">{audio.author} · {audio.duration}</p>
+        <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-0.5">{resource.category}</p>
+        <p className="text-sm font-semibold text-foreground leading-tight">{resource.title}</p>
+        <div className="flex items-center gap-1.5 mt-0.5">
+          <Youtube className="w-3 h-3 text-red-400" />
+          <p className="text-xs text-muted-foreground">{resource.author} · {resource.duration}</p>
         </div>
       </div>
       <div className="flex items-center gap-2 shrink-0">
-        <button onClick={() => onFav(audio.id)}
-          className="w-8 h-8 rounded-xl flex items-center justify-center transition-colors hover:bg-secondary/50">
+        <button
+          onClick={(e) => onFav(e, resource.id)}
+          className="w-8 h-8 rounded-xl flex items-center justify-center transition-colors hover:bg-secondary/50"
+        >
           <Heart className={`w-4 h-4 transition-colors ${isFav ? 'fill-primary text-primary' : 'text-muted-foreground/40'}`} />
         </button>
-        <button onClick={() => onPlay(audio)}
-          className="w-9 h-9 rounded-xl flex items-center justify-center text-white shrink-0"
-          style={{ background: '#E07A5F' }}>
-          <Play className="w-4 h-4 ml-0.5" />
-        </button>
+        <div className="w-8 h-8 rounded-xl flex items-center justify-center text-muted-foreground/40">
+          <ExternalLink className="w-3.5 h-3.5" />
+        </div>
       </div>
-    </motion.div>
+    </motion.a>
   );
 }

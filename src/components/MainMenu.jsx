@@ -71,7 +71,7 @@ export default function MainMenu({ user }) {
                 <MenuItem icon={History} label="Historial" onClick={() => go('/historial')} />
                 <MenuItem icon={Dumbbell} label="Práctica Guiada" onClick={() => go('/practica')} />
                 <MenuItem icon={Heart} label="Espacio de pareja" onClick={() => go('/espacio')} />
-                <MenuItem icon={Headphones} label="Biblioteca Auditiva" onClick={() => go('/biblioteca-auditiva')} />
+                <MenuItem icon={Headphones} label="Biblioteca" onClick={() => go('/biblioteca-auditiva')} />
                 <MenuItem icon={BookOpen} label="Biblioteca CNV" onClick={() => go('/recursos')} />
                 <MenuItem icon={User} label="Mi perfil" onClick={() => go('/profile')} />
               </div>
