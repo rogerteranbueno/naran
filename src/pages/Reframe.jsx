@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, BookmarkPlus, Share2, Check, ChevronDown, ChevronUp } from 'lucide-react';
+
 import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import TestimonialPrompt from '@/components/TestimonialPrompt';
@@ -41,7 +42,6 @@ export default function Reframe() {
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState(null);
-  const [showTestimonialPrompt, setShowTestimonialPrompt] = useState(false);
 
   // Limpiar cualquier prefijo que el prompt interno haya colado en original_text
   const rawText = state?.original_text || '';
@@ -72,7 +72,6 @@ export default function Reframe() {
     await saveLog({ original_text: originalText, cognitive_note: cognitiveNote, reframe_message: reframeMessage, action_taken: 'saved' });
     setSaved(true);
     setSaving(false);
-    setShowTestimonialPrompt(true);
     showToast('Guardado en historial ✓');
   };
 
@@ -104,12 +103,6 @@ export default function Reframe() {
       </div>
 
       <div className="flex-1 flex flex-col px-5 pb-6 overflow-y-auto">
-        <AnimatePresence>
-          {showTestimonialPrompt && (
-            <TestimonialPrompt onDismiss={() => setShowTestimonialPrompt(false)} />
-          )}
-        </AnimatePresence>
-
         {/* Original (crossed out) */}
         {originalText && (
           <motion.div
@@ -193,6 +186,11 @@ export default function Reframe() {
             />
           </div>
         </motion.div>
+
+        {/* Testimonial prompt — colapsable al fondo */}
+        <div className="mt-2 mb-2">
+          <TestimonialPrompt />
+        </div>
       </div>
 
       {/* Bottom toolbar — iOS style */}

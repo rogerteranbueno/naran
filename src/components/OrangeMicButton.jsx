@@ -1,10 +1,11 @@
 import { motion } from 'framer-motion';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 export default function OrangeMicButton({ isListening, onPressStart, onPressEnd, onTap }) {
   const [pressed, setPressed] = useState(false);
   const [seconds, setSeconds] = useState(0);
-  const pressStartTime = useState(null);
+  const pressStartRef = useRef(null);
+  const didFireStart = useRef(false);
 
   useEffect(() => {
     if (!isListening) { setSeconds(0); return; }
@@ -15,21 +16,35 @@ export default function OrangeMicButton({ isListening, onPressStart, onPressEnd,
   const handlePointerDown = (e) => {
     e.preventDefault();
     setPressed(true);
-    pressStartTime[1](Date.now());
-    onPressStart?.();
+    pressStartRef.current = Date.now();
+    didFireStart.current = false;
+
+    // Delay firing onPressStart to distinguish tap vs hold
+    setTimeout(() => {
+      if (pressStartRef.current !== null) {
+        // Still held — it's a hold
+        didFireStart.current = true;
+        onPressStart?.();
+      }
+    }, 250);
   };
 
   const handlePointerUp = (e) => {
     e.preventDefault();
     if (!pressed) return;
+    const startTime = pressStartRef.current;
+    pressStartRef.current = null;
     setPressed(false);
-    const held = Date.now() - (pressStartTime[0] || Date.now());
-    if (held < 300) {
-      // Tap rápido — delegar al padre como toggle
+
+    const held = Date.now() - (startTime || Date.now());
+    if (held < 250) {
+      // Tap rápido — toggle mode
       onTap?.();
-    } else {
+    } else if (didFireStart.current) {
+      // Hold released — process
       onPressEnd?.();
     }
+    didFireStart.current = false;
   };
 
   return (
@@ -79,17 +94,14 @@ export default function OrangeMicButton({ isListening, onPressStart, onPressEnd,
             : '0 8px 32px rgba(224,122,95,0.35), 0 2px 8px rgba(224,122,95,0.2)',
         }}
       >
-        {/* Orange emoji or recording state */}
         {isListening ? (
           <div className="flex flex-col items-center gap-1.5">
-            {/* Timer */}
             <div className="flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
               <span className="text-white font-semibold text-sm tabular-nums">
                 {String(Math.floor(seconds / 60)).padStart(2, '0')}:{String(seconds % 60).padStart(2, '0')}
               </span>
             </div>
-            {/* Bars */}
             <div className="flex gap-1 items-end h-5">
               {[0, 0.15, 0.3, 0.15, 0].map((delay, i) => (
                 <motion.div
@@ -100,12 +112,12 @@ export default function OrangeMicButton({ isListening, onPressStart, onPressEnd,
                 />
               ))}
             </div>
-            <span className="text-white/70 text-[9px]">Suelta para procesar</span>
+            <span className="text-white/70 text-[9px]">Toca para parar</span>
           </div>
         ) : (
           <div className="flex flex-col items-center gap-1.5">
             <span className="text-4xl select-none">🍊</span>
-            <span className="text-white/80 text-[10px]">Mantén pulsado</span>
+            <span className="text-white/80 text-[10px]">Toca o mantén</span>
           </div>
         )}
       </motion.button>
