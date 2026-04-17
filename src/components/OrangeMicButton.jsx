@@ -1,11 +1,9 @@
 import { motion } from 'framer-motion';
 import { useState, useEffect, useRef } from 'react';
 
-export default function OrangeMicButton({ isListening, onPressStart, onPressEnd, onTap }) {
+export default function OrangeMicButton({ isListening, onTap }) {
   const [pressed, setPressed] = useState(false);
   const [seconds, setSeconds] = useState(0);
-  const pressStartRef = useRef(null);
-  const didFireStart = useRef(false);
 
   useEffect(() => {
     if (!isListening) { setSeconds(0); return; }
@@ -16,55 +14,25 @@ export default function OrangeMicButton({ isListening, onPressStart, onPressEnd,
   const handlePointerDown = (e) => {
     e.preventDefault();
     setPressed(true);
-    pressStartRef.current = Date.now();
-    didFireStart.current = false;
-
-    // Delay firing onPressStart to distinguish tap vs hold
-    setTimeout(() => {
-      if (pressStartRef.current !== null) {
-        // Still held — it's a hold
-        didFireStart.current = true;
-        onPressStart?.();
-      }
-    }, 250);
   };
 
   const handlePointerUp = (e) => {
     e.preventDefault();
     if (!pressed) return;
-    const startTime = pressStartRef.current;
-    pressStartRef.current = null;
     setPressed(false);
-
-    const held = Date.now() - (startTime || Date.now());
-    if (held < 250) {
-      // Tap rápido — toggle mode
-      onTap?.();
-    } else if (didFireStart.current) {
-      // Hold released — process
-      onPressEnd?.();
-    }
-    didFireStart.current = false;
+    onTap?.();
   };
 
   return (
     <div className="relative flex items-center justify-center" style={{ width: 160, height: 160 }}>
-      {/* Breathing rings when listening */}
+      {/* Breathing halo when listening */}
       {isListening && (
-        <>
-          <motion.div
-            className="absolute rounded-full"
-            style={{ width: 160, height: 160, background: 'rgba(224,122,95,0.12)' }}
-            animate={{ scale: [1, 1.4, 1], opacity: [0.6, 0, 0.6] }}
-            transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-          />
-          <motion.div
-            className="absolute rounded-full"
-            style={{ width: 160, height: 160, background: 'rgba(224,122,95,0.08)' }}
-            animate={{ scale: [1, 1.7, 1], opacity: [0.5, 0, 0.5] }}
-            transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut', delay: 0.4 }}
-          />
-        </>
+        <motion.div
+          className="absolute rounded-full"
+          style={{ width: 160, height: 160, border: '8px solid rgba(224,122,95,0.3)' }}
+          animate={{ scale: [1, 1.08, 1], opacity: [0.8, 0.4, 0.8] }}
+          transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
+        />
       )}
 
       {/* Gentle idle pulse */}
@@ -112,12 +80,12 @@ export default function OrangeMicButton({ isListening, onPressStart, onPressEnd,
                 />
               ))}
             </div>
-            <span className="text-white/70 text-[9px]">Toca para parar</span>
+            <span className="text-white/70 text-[9px]">Te escucho, sigue…</span>
           </div>
         ) : (
           <div className="flex flex-col items-center gap-1.5">
             <span className="text-4xl select-none">🍊</span>
-            <span className="text-white/80 text-[10px]">Toca o mantén</span>
+            <span className="text-white/80 text-[10px]">Toca para empezar</span>
           </div>
         )}
       </motion.button>

@@ -73,13 +73,17 @@ export default function Home() {
     });
   };
 
-  const handleMicRelease = () => {
-    setTapMode(false);
-    stopListening();
-    setTimeout(() => {
-      const current = text.trim();
-      if (current) goToReframe(current);
-    }, 400);
+  const handleMicToggle = () => {
+    if (listening) {
+      stopListening();
+      setTimeout(() => {
+        const current = text.trim();
+        if (current) goToReframe(current);
+      }, 400);
+    } else {
+      resetTranscript();
+      startListening();
+    }
   };
 
   const handleTextKeyDown = (e) => {
@@ -155,36 +159,10 @@ export default function Home() {
           <div className="flex flex-col items-center gap-4">
             <OrangeMicButton
               isListening={listening}
-              onPressStart={() => { resetTranscript(); startListening(); }}
-              onPressEnd={handleMicRelease}
-              onTap={() => {
-                if (listening) {
-                  handleMicRelease();
-                } else {
-                  resetTranscript();
-                  startListening();
-                  setTapMode(true);
-                }
-              }}
+              onTap={handleMicToggle}
             />
             {/* Tap-to-record toggle */}
-            {!listening ? (
-              <button
-                onClick={() => { resetTranscript(); startListening(); setTapMode(true); }}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs text-muted-foreground/50 hover:text-muted-foreground border border-border/40 bg-white/60 transition-colors"
-              >
-                <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/40" />
-                Toca para grabar
-              </button>
-            ) : tapMode ? (
-              <button
-                onClick={() => { setTapMode(false); handleMicRelease(); }}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border border-red-200 bg-red-50 text-red-500 transition-colors animate-pulse"
-              >
-                <span className="w-1.5 h-1.5 rounded-full bg-red-400" />
-                Toca para parar
-              </button>
-            ) : null}
+
           </div>
         )}
 
@@ -210,7 +188,7 @@ export default function Home() {
             transition={{ delay: 0.4 }}
             className="mt-6 text-sm text-muted-foreground/60 leading-relaxed text-center"
           >
-            {browserSupported ? 'Mantén pulsado y habla' : 'Escribe lo que sientes'}
+            {browserSupported ? 'Toca para soltar lo que sientes' : 'Escribe lo que sientes'}
           </motion.p>
         )}
 
@@ -256,7 +234,7 @@ export default function Home() {
                   className="flex items-center gap-2 mx-auto text-xs text-muted-foreground/50 hover:text-muted-foreground transition-colors"
                 >
                   <Pencil className="w-3 h-3" />
-                  Prefiero escribir
+                  Prefiero escribirlo
                 </button>
               ) : (
                 <motion.div

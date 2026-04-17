@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, BookmarkPlus, Share2, Check, ChevronDown, ChevronUp } from 'lucide-react';
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
+import { humanizeDiagnosis } from '@/lib/humanizeDiagnosis';
 import TestimonialPrompt from '@/components/TestimonialPrompt';
 
 const GOTTMAN_TIPS = {
@@ -42,12 +43,24 @@ export default function Reframe() {
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState(null);
+  const [humanizedDiagnosis, setHumanizedDiagnosis] = useState(null);
+  const [loadingDiagnosis, setLoadingDiagnosis] = useState(false);
 
   // Limpiar cualquier prefijo que el prompt interno haya colado en original_text
   const rawText = state?.original_text || '';
   const originalText = rawText.replace(/^el usuario (reporta sentirse|se siente)[^.]+\.\s*(su mensaje:?\s*)?/i, '').replace(/^"(.+)"$/, '$1').trim();
   const cognitiveNote = state?.cognitive_note || '';
   const [reframeMessage, setReframeMessage] = useState(state?.reframe_message || '');
+
+  useEffect(() => {
+    if (cognitiveNote) {
+      setLoadingDiagnosis(true);
+      humanizeDiagnosis(cognitiveNote)
+        .then(setHumanizedDiagnosis)
+        .finally(() => setLoadingDiagnosis(false))
+        .catch(() => setHumanizedDiagnosis(cognitiveNote));
+    }
+  }, [cognitiveNote]);
 
   const tip = getGottmanTip(cognitiveNote);
 
@@ -133,7 +146,7 @@ export default function Reframe() {
           </motion.div>
         )}
 
-        {/* Cognitive note */}
+        {/* Humanized diagnosis */}
         {cognitiveNote && (
           <motion.div
             initial={{ opacity: 0, y: 6 }}
@@ -141,30 +154,15 @@ export default function Reframe() {
             transition={{ delay: 0.08 }}
             className="mb-5"
           >
-            <button
-              onClick={() => setTipOpen(o => !o)}
-              className="flex items-center gap-1.5 text-xs text-primary/70 underline decoration-dotted underline-offset-2 hover:text-primary transition-colors"
-            >
-              ✨ ¿Por qué esto ayuda? ·
-              {tipOpen ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-            </button>
-            <AnimatePresence>
-              {tipOpen && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="overflow-hidden"
-                >
-                  <div className="mt-2 rounded-xl px-4 py-3 border border-primary/15"
-                    style={{ background: 'rgba(224,122,95,0.06)' }}>
-                    <p className="text-xs text-foreground/80 leading-relaxed">
-                      <span className="font-medium text-primary">Naran detectó:</span> {cognitiveNote}. {tip}
-                    </p>
-                  </div>
-                </motion.div>
+            <p className="text-xs font-semibold text-primary/70 uppercase tracking-wide mb-2">Lo que hay detrás de tu malestar</p>
+            <div className="rounded-xl px-4 py-3 border border-primary/15"
+              style={{ background: 'rgba(224,122,95,0.08)' }}>
+              {loadingDiagnosis ? (
+                <p className="text-xs text-foreground/60 italic">Analizando…</p>
+              ) : (
+                <p className="text-sm text-foreground/80 leading-relaxed">{humanizedDiagnosis || cognitiveNote}</p>
               )}
-            </AnimatePresence>
+            </div>
           </motion.div>
         )}
 
@@ -184,6 +182,11 @@ export default function Reframe() {
               className="w-full resize-none px-5 pt-6 pb-6 text-xl leading-relaxed bg-transparent focus:outline-none tracking-wide cursor-text"
               style={{ color: '#2C2C2C' }}
             />
+          </div>
+          <div className="mt-3 rounded-xl px-4 py-3 bg-muted/40 border border-muted/60">
+            <p className="text-xs text-muted-foreground leading-relaxed italic">
+              "Expresar lo que necesitas en lugar de lo que el otro hizo mal abre una puerta. (Pilar de la Torre)"
+            </p>
           </div>
         </motion.div>
 
