@@ -107,6 +107,13 @@ export default function Profile() {
               color="rgba(201,97,74,0.10)"
               onClick={() => navigate('/recursos')}
             />
+            <LibraryCard
+              emoji="🍊"
+              title="Pilar de la Torre"
+              subtitle="CNV en español · Videos y podcast"
+              color="rgba(224,122,95,0.10)"
+              onClick={() => navigate('/recursos')}
+            />
           </div>
         </motion.div>
 

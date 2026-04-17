@@ -98,6 +98,7 @@ export default function Historial() {
                     'bg-secondary text-muted-foreground'
                   }`}>
                     {log.status === 'resolved' ? 'Resuelto' : log.status === 'escalated' ? 'Escaló' : 'Pendiente'}
+
                   </span>
                 </motion.button>
               ))}

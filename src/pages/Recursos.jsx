@@ -1,7 +1,31 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Youtube, Mic } from 'lucide-react';
 import { motion } from 'framer-motion';
+
+const PILAR_SECTION = {
+  title: 'Pilar de la Torre y la CNV',
+  emoji: '🍊',
+  intro: '"La CNV no es buenismo, es una forma eficaz de entenderse." — Pilar de la Torre, referente hispanohablante formada por Marshall Rosenberg.',
+  items: [
+    {
+      type: 'video',
+      title: 'Pilar de la Torre explica la CNV en 10 minutos',
+      url: 'https://www.youtube.com/watch?v=ZjSuHfHF7F4',
+      desc: 'Una introducción clara y cercana al método, perfecta como punto de partida.',
+    },
+    {
+      type: 'podcast',
+      title: 'Podcast Decodificados #53',
+      url: 'https://open.spotify.com/show/pilar-de-la-torre',
+      desc: 'Pilar profundiza en cómo aplicar la CNV en conflictos cotidianos de pareja.',
+    },
+    {
+      type: 'quote',
+      text: '"Cuando expresamos lo que necesitamos en lugar de lo que el otro hace mal, abrimos una puerta." — Pilar de la Torre',
+    },
+  ],
+};
 
 const SECTIONS = [
   {
@@ -89,6 +113,58 @@ export default function Recursos() {
       </div>
 
       <div className="flex-1 overflow-y-auto px-5 pb-10 space-y-8">
+
+        {/* Pilar de la Torre */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="rounded-3xl overflow-hidden border border-border"
+          style={{ background: 'rgba(224,122,95,0.06)' }}
+        >
+          <div className="px-5 pt-5 pb-4">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-2xl">{PILAR_SECTION.emoji}</span>
+              <h2 className="text-base font-semibold text-foreground">{PILAR_SECTION.title}</h2>
+            </div>
+            <p className="text-sm text-muted-foreground leading-relaxed italic mb-4">{PILAR_SECTION.intro}</p>
+
+            <div className="space-y-3">
+              {PILAR_SECTION.items.map((item, i) => (
+                <div key={i}>
+                  {item.type === 'video' && (
+                    <a href={item.url} target="_blank" rel="noopener noreferrer"
+                      className="flex items-start gap-3 rounded-2xl bg-white border border-border/40 px-4 py-3 hover:bg-secondary/30 transition-colors">
+                      <Youtube className="w-4 h-4 text-red-500 mt-0.5 shrink-0" />
+                      <div>
+                        <p className="text-sm font-medium text-foreground">{item.title}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">{item.desc}</p>
+                      </div>
+                      <ExternalLink className="w-3.5 h-3.5 text-muted-foreground/40 mt-0.5 ml-auto shrink-0" />
+                    </a>
+                  )}
+                  {item.type === 'podcast' && (
+                    <a href={item.url} target="_blank" rel="noopener noreferrer"
+                      className="flex items-start gap-3 rounded-2xl bg-white border border-border/40 px-4 py-3 hover:bg-secondary/30 transition-colors">
+                      <Mic className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                      <div>
+                        <p className="text-sm font-medium text-foreground">{item.title}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">{item.desc}</p>
+                      </div>
+                      <ExternalLink className="w-3.5 h-3.5 text-muted-foreground/40 mt-0.5 ml-auto shrink-0" />
+                    </a>
+                  )}
+                  {item.type === 'quote' && (
+                    <div className="rounded-2xl px-4 py-3 border border-primary/20"
+                      style={{ background: 'rgba(224,122,95,0.08)' }}>
+                      <p className="text-sm text-foreground/80 leading-relaxed italic">{item.text}</p>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </motion.div>
+
         {SECTIONS.map((section, si) => (
           <motion.div
             key={si}

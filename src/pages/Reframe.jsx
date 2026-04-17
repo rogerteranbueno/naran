@@ -41,11 +41,24 @@ export default function Reframe() {
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState(null);
 
-  const originalText = state?.original_text || '';
+  // Limpiar cualquier prefijo que el prompt interno haya colado en original_text
+  const rawText = state?.original_text || '';
+  const originalText = rawText.replace(/^el usuario (reporta sentirse|se siente)[^.]+\.\s*(su mensaje:?\s*)?/i, '').replace(/^"(.+)"$/, '$1').trim();
   const cognitiveNote = state?.cognitive_note || '';
   const [reframeMessage, setReframeMessage] = useState(state?.reframe_message || '');
 
   const tip = getGottmanTip(cognitiveNote);
+
+  // Detectar Jinete de Gottman para badge
+  function detectJinete(text = '') {
+    const t = text.toLowerCase();
+    if (/siempre|nunca|eres un|eres una/.test(t)) return { label: 'Crítica', hint: 'Prueba un Inicio Suave.' };
+    if (/qué ridículo|qué tontería|increíble lo tuyo|en serio/.test(t)) return { label: 'Desprecio', hint: 'Busca algo que valorar.' };
+    if (/es que tú|pues tú también|y tú qué/.test(t)) return { label: 'Defensividad', hint: 'Asume un 5% de responsabilidad.' };
+    if (text.trim().split(' ').length < 5) return { label: 'Evasión', hint: 'Intenta nombrar lo que sientes.' };
+    return null;
+  }
+  const jinete = detectJinete(originalText);
 
   const showToast = (msg) => {
     setToast(msg);
@@ -104,6 +117,22 @@ export default function Reframe() {
           </motion.div>
         )}
 
+        {/* Jinete badge */}
+        {jinete && (
+          <motion.div
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.05 }}
+            className="mb-4 flex items-center gap-2"
+          >
+            <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium border"
+              style={{ background: 'rgba(224,122,95,0.10)', borderColor: 'rgba(224,122,95,0.25)', color: '#C9614A' }}>
+              ⚠️ {jinete.label}
+            </span>
+            <span className="text-xs text-muted-foreground">{jinete.hint}</span>
+          </motion.div>
+        )}
+
         {/* Cognitive note */}
         {cognitiveNote && (
           <motion.div
@@ -116,7 +145,7 @@ export default function Reframe() {
               onClick={() => setTipOpen(o => !o)}
               className="flex items-center gap-1.5 text-xs text-primary/70 underline decoration-dotted underline-offset-2 hover:text-primary transition-colors"
             >
-              ✨ ¿Por qué esto funciona? ·
+              ✨ ¿Por qué esto ayuda? ·
               {tipOpen ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
             </button>
             <AnimatePresence>
