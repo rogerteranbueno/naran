@@ -131,7 +131,7 @@
 /* Mobile UX */
 html, body, #root {
   overscroll-behavior: none;
-  background-color: #FDFBF7;
+  background-color: #FDFBF7 !important;
   min-height: 100%;
 }
 
