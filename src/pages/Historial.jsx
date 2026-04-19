@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import WeeklyChart from '@/components/WeeklyChart';
 import { generateWeeklyPDF } from '@/utils/generateReport';
+import { isDemoMode, DEMO_LOGS, DEMO_USER } from '@/lib/demoMode';
 
 function timeAgo(dateStr) {
   const diffMs = Date.now() - new Date(dateStr).getTime();
@@ -51,6 +52,12 @@ export default function Historial() {
   const scrollRef = useRef(null);
 
   const fetchLogs = useCallback(async () => {
+    if (isDemoMode()) {
+      setTotal(DEMO_LOGS.length);
+      setLogs(DEMO_LOGS.slice(0, PAGE_SIZE));
+      setPage(1);
+      return;
+    }
     const all = await base44.entities.ConflictLog.list('-created_date', 100);
     setTotal(all.length);
     setLogs(all.slice(0, PAGE_SIZE));
@@ -69,17 +76,17 @@ export default function Historial() {
 
   const handleDownloadPDF = async () => {
     setGeneratingPDF(true);
-    const user = await base44.auth.me().catch(() => null);
-    // Get last 7 days
-    const since = new Date();
-    since.setDate(since.getDate() - 7);
-    const all = await base44.entities.ConflictLog.list('-created_date', 100);
+    const isDemo = isDemoMode();
+    const user = isDemo ? DEMO_USER : await base44.auth.me().catch(() => null);
+    const since = new Date(); since.setDate(since.getDate() - 7);
+    const all = isDemo ? DEMO_LOGS : await base44.entities.ConflictLog.list('-created_date', 100);
     const weekly = all.filter(l => new Date(l.created_date) >= since);
     generateWeeklyPDF(user?.full_name || 'Usuario', weekly.length > 0 ? weekly : all.slice(0, 10));
     setGeneratingPDF(false);
   };
 
   const loadMore = () => {
+    if (isDemoMode()) return;
     base44.entities.ConflictLog.list('-created_date', 100).then(all => {
       const next = page + 1;
       setLogs(all.slice(0, next * PAGE_SIZE));

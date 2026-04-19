@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { motion } from 'framer-motion';
+import { startDemo } from '@/lib/demoMode';
 
 export default function Welcome() {
   const navigate = useNavigate();
@@ -27,6 +28,11 @@ export default function Welcome() {
       </div>
     );
   }
+
+  const handleDemo = () => {
+    startDemo();
+    navigate('/home');
+  };
 
   return (
     <div className="flex-1 flex flex-col justify-between px-6 py-12"
@@ -58,7 +64,7 @@ export default function Welcome() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.3 }}
-        className="space-y-4"
+        className="space-y-3"
       >
         <Button
           onClick={handleLogin}
@@ -68,7 +74,15 @@ export default function Welcome() {
           <ArrowRight className="w-4 h-4" />
         </Button>
 
-        <p className="text-center text-xs text-muted-foreground/70">
+        <button
+          onClick={handleDemo}
+          className="w-full h-12 rounded-2xl text-sm font-medium border-2 transition-colors touch-none select-none"
+          style={{ borderColor: '#E07A5F', color: '#E07A5F', background: 'transparent' }}
+        >
+          Probar Naran sin registro
+        </button>
+
+        <p className="text-center text-xs text-muted-foreground/70 pt-1">
           Al continuar aceptas nuestros términos de uso y privacidad.
         </p>
       </motion.div>

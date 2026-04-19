@@ -5,6 +5,8 @@ import { Pencil } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import useSpeechInput from '@/hooks/useSpeechInput';
 import { syncPendingLogs } from '@/utils/offlineStorage';
+import { isDemoMode } from '@/lib/demoMode';
+import DemoBanner from '@/components/DemoBanner';
 import OrangeMicButton from '@/components/OrangeMicButton';
 import MicPermissionCard from '@/components/MicPermissionCard';
 import Onboarding from '@/components/Onboarding';
@@ -129,8 +131,9 @@ export default function Home() {
           ))}
         </div>
       </div>
-    );
-  }
+      {isDemoMode() && <DemoBanner />}
+      );
+      }
 
   return (
     <div className="flex-1 flex flex-col relative overflow-hidden"

@@ -7,6 +7,7 @@ import { base44 } from '@/api/base44Client';
 import { humanizeDiagnosis } from '@/lib/humanizeDiagnosis';
 import TestimonialPrompt from '@/components/TestimonialPrompt';
 import { saveLogOffline } from '@/utils/offlineStorage';
+import { isDemoMode } from '@/lib/demoMode';
 
 const GOTTMAN_TIPS = {
   'crítica': 'Inicio suave: habla de TU sentimiento, no del defecto del otro.',
@@ -26,6 +27,7 @@ function getGottmanTip(note = '') {
 }
 
 async function saveLog({ original_text, cognitive_note, reframe_message, action_taken }) {
+  if (isDemoMode()) return 'demo';
   const user = await base44.auth.me().catch(() => null);
   const logData = {
     user_email: user?.email || '',
@@ -88,10 +90,14 @@ export default function Reframe() {
 
   const handleSave = async () => {
     setSaving(true);
-    await saveLog({ original_text: originalText, cognitive_note: cognitiveNote, reframe_message: reframeMessage, action_taken: 'saved' });
+    const result = await saveLog({ original_text: originalText, cognitive_note: cognitiveNote, reframe_message: reframeMessage, action_taken: 'saved' });
     setSaved(true);
     setSaving(false);
-    showToast(navigator.onLine ? 'Guardado en historial ✓' : 'Sin conexión. Se sincronizará luego ✓');
+    if (result === 'demo') {
+      showToast('Regístrate para guardar tu progreso y llevar un historial real.');
+    } else {
+      showToast(navigator.onLine ? 'Guardado en historial ✓' : 'Sin conexión. Se sincronizará luego ✓');
+    }
   };
 
   const handleShare = async () => {
