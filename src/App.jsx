@@ -21,6 +21,7 @@ import Espacio from '@/pages/Espacio';
 import Unirse from '@/pages/Unirse';
 import BibliotecaAuditiva from '@/pages/BibliotecaAuditiva';
 import Admin from '@/pages/Admin';
+import Demo from '@/pages/Demo';
 
 // Ensure app always uses light theme
 function SystemThemeSync() {
@@ -81,6 +82,7 @@ const AuthenticatedApp = () => {
         <Route path="/unirse" element={<AnimatedRoutes><Unirse /></AnimatedRoutes>} />
         <Route path="/biblioteca-auditiva" element={<AnimatedRoutes><BibliotecaAuditiva /></AnimatedRoutes>} />
         <Route path="/admin" element={<AnimatedRoutes><Admin /></AnimatedRoutes>} />
+        <Route path="/demo" element={<AnimatedRoutes><Demo /></AnimatedRoutes>} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>

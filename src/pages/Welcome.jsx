@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { motion } from 'framer-motion';
-import { startDemo } from '@/lib/demoMode';
 
 export default function Welcome() {
   const navigate = useNavigate();
@@ -30,8 +29,7 @@ export default function Welcome() {
   }
 
   const handleDemo = () => {
-    startDemo();
-    navigate('/home');
+    navigate('/demo');
   };
 
   return (
