@@ -130,10 +130,9 @@ export default function Home() {
               transition={{ duration: 1.2, repeat: Infinity, delay }} />
           ))}
         </div>
-        </div>
-        {isDemoMode() && <DemoBanner />}
-        );
-        }
+      </div>
+    );
+  }
 
   return (
     <div className="flex-1 flex flex-col relative overflow-hidden"
@@ -267,6 +266,7 @@ export default function Home() {
           )}
         </AnimatePresence>
       </div>
+      {isDemoMode() && <DemoBanner />}
     </div>
   );
 }
