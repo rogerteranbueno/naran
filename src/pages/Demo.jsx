@@ -126,7 +126,7 @@ Devuelve un JSON con:
       {/* Header */}
       <div className="flex items-center justify-between px-5 pt-10 pb-4">
         <button
-          onClick={() => step === 'elegir' ? navigate('/login') : setStep('elegir')}
+          onClick={() => step === 'elegir' ? navigate('/') : setStep('elegir')}
           className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
