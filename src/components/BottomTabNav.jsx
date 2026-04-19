@@ -20,7 +20,8 @@ export default function BottomTabNav() {
       className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-border safe-bottom"
       style={{ maxWidth: '100vw', margin: '0 auto' }}
     >
-      <div className="max-w-md mx-auto flex items-center justify-around h-20 px-2">
+      <div className="max-w-md mx-auto flex items-center justify-around px-2"
+        style={{ height: 64, paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
         {TABS.map(tab => {
           const isActive = pathname === tab.path;
           const Icon = tab.icon;
@@ -28,20 +29,16 @@ export default function BottomTabNav() {
             <button
               key={tab.path}
               onClick={() => navigate(tab.path)}
-              className="flex flex-col items-center justify-center gap-1 flex-1 py-2 transition-colors touch-none select-none"
+              aria-label={tab.label}
+              className="flex flex-col items-center justify-center gap-1 flex-1 h-full transition-colors touch-none select-none"
             >
               <Icon
                 className="w-5 h-5"
-                style={{
-                  color: isActive ? '#E07A5F' : '#999',
-                  transition: 'color 0.2s ease',
-                }}
+                style={{ color: isActive ? '#E07A5F' : '#999' }}
               />
               <span
-                className="text-[10px] font-medium transition-colors"
-                style={{
-                  color: isActive ? '#E07A5F' : '#999',
-                }}
+                className="text-xs font-medium transition-colors"
+                style={{ color: isActive ? '#E07A5F' : '#999', fontSize: 11 }}
               >
                 {tab.label}
               </span>

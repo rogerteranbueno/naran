@@ -84,6 +84,7 @@ export default function Home() {
   };
 
   const handleMicToggle = () => {
+    if (analyzing) return; // guard against double-tap
     if (listening) {
       stopListening();
       setTimeout(() => {
@@ -245,8 +246,11 @@ export default function Home() {
                     value={text}
                     onChange={e => setText(e.target.value)}
                     onKeyDown={handleTextKeyDown}
-                    placeholder="Escribe lo que sientes… (Enter para continuar)"
+                    placeholder="Escribe lo que sientes…"
                     rows={3}
+                    inputMode="text"
+                    enterKeyHint="send"
+                    aria-label="Escribe lo que sientes"
                     className="w-full resize-none rounded-2xl border border-border/60 bg-white/80 backdrop-blur-sm px-4 py-3 text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground/40 shadow-sm"
                   />
                   {text.trim() && (

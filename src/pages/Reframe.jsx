@@ -191,6 +191,8 @@ export default function Reframe() {
               value={reframeMessage}
               onChange={e => setReframeMessage(e.target.value)}
               rows={5}
+              inputMode="text"
+              aria-label="Mensaje reencuadrado, editable"
               className="w-full resize-none px-5 pt-6 pb-6 text-xl leading-relaxed bg-transparent focus:outline-none tracking-wide cursor-text"
               style={{ color: '#2C2C2C' }}
             />
@@ -262,6 +264,7 @@ function ToolbarButton({ icon, label, onClick, loading, done, accent }) {
     <button
       onClick={onClick}
       disabled={loading}
+      aria-label={label}
       className="flex flex-col items-center gap-1.5 transition-all disabled:opacity-40 active:scale-90"
       style={{ color: accent ? '#E07A5F' : undefined }}
     >
