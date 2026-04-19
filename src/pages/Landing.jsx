@@ -47,14 +47,15 @@ export default function Landing() {
   const handleDemo = () => navigate('/demo');
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: '#FDFBF7' }}>
+    <div className="min-h-screen flex flex-col" style={{ background: '#FDFBF7', color: '#2C2C2C' }}>
 
       {/* Nav */}
       <nav className="flex items-center justify-between px-6 py-4 max-w-2xl mx-auto w-full">
-        <span className="text-xl font-semibold tracking-tight text-foreground">🍊 naran</span>
+        <span className="text-xl font-semibold tracking-tight" style={{ color: '#2C2C2C' }}>🍊 naran</span>
         <button
           onClick={handleLogin}
-          className="text-sm font-medium px-4 py-2 rounded-xl border border-border/60 hover:bg-secondary/60 transition-colors"
+          className="text-sm font-medium px-4 py-2 rounded-xl transition-colors"
+          style={{ border: '1px solid #E5E0D8', color: '#2C2C2C', background: 'transparent' }}
         >
           {authed ? 'Ir a la app →' : 'Iniciar sesión'}
         </button>
@@ -73,10 +74,10 @@ export default function Landing() {
           >
             🍊
           </div>
-          <h1 className="text-4xl font-bold tracking-tight text-foreground leading-tight mb-4">
+          <h1 className="text-4xl font-bold tracking-tight leading-tight mb-4" style={{ color: '#1A1A1A' }}>
             Habla desde el corazón,<br />no desde el enojo.
           </h1>
-          <p className="text-muted-foreground text-base leading-relaxed mb-10 max-w-sm mx-auto">
+          <p className="text-base leading-relaxed mb-10 max-w-sm mx-auto" style={{ color: '#6B6560' }}>
             Naran te ayuda a transformar tus reacciones en mensajes de conexión,
             usando inteligencia artificial y psicología de pareja.
           </p>
@@ -92,12 +93,13 @@ export default function Landing() {
             </button>
             <button
               onClick={handleDemo}
-              className="h-11 px-8 rounded-2xl text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+              className="h-11 px-8 rounded-2xl text-sm font-medium transition-colors"
+              style={{ color: '#6B6560' }}
             >
               Ver demo sin registro →
             </button>
           </div>
-          <p className="text-xs text-muted-foreground/60 mt-2">Sin tarjeta de crédito · Gratis para empezar</p>
+          <p className="text-xs mt-2" style={{ color: '#A89F97' }}>Sin tarjeta de crédito · Gratis para empezar</p>
         </motion.div>
       </section>
 
@@ -115,7 +117,8 @@ export default function Landing() {
               initial={{ opacity: 0, x: -16 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.4 + i * 0.08 }}
-              className="flex items-start gap-4 bg-white rounded-2xl px-5 py-4 border border-border/40 shadow-sm"
+              className="flex items-start gap-4 rounded-2xl px-5 py-4 shadow-sm"
+              style={{ background: '#FFFFFF', border: '1px solid #EDE8E0' }}
             >
               <div
                 className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 mt-0.5"
@@ -124,8 +127,8 @@ export default function Landing() {
                 {f.icon}
               </div>
               <div>
-                <p className="font-semibold text-foreground text-sm">{f.title}</p>
-                <p className="text-xs text-muted-foreground leading-relaxed mt-0.5">{f.desc}</p>
+                <p className="font-semibold text-sm" style={{ color: '#1A1A1A' }}>{f.title}</p>
+                <p className="text-xs leading-relaxed mt-0.5" style={{ color: '#6B6560' }}>{f.desc}</p>
               </div>
             </motion.div>
           ))}
@@ -145,7 +148,7 @@ export default function Landing() {
           >
             {authed ? 'Ir a mi app 🍊' : 'Crear mi cuenta gratis 🍊'}
           </button>
-          <p className="text-xs text-muted-foreground/50 mt-4">
+          <p className="text-xs mt-4" style={{ color: '#A89F97' }}>
             © 2025 Naran · Comunicación de pareja con IA
           </p>
         </motion.div>
