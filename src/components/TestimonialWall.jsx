@@ -15,11 +15,13 @@ export default function TestimonialWall() {
 
   const applaud = async (t) => {
     if (applauded.includes(t.id)) return;
+    // Optimistic UI: update immediately
     const next = [...applauded, t.id];
     setApplauded(next);
-    localStorage.setItem('naran_applauded', JSON.stringify(next));
-    await base44.entities.Testimonial.update(t.id, { applause_count: (t.applause_count || 0) + 1 });
     setTestimonials(prev => prev.map(x => x.id === t.id ? { ...x, applause_count: (x.applause_count || 0) + 1 } : x));
+    localStorage.setItem('naran_applauded', JSON.stringify(next));
+    // Sync to backend (fire and forget)
+    base44.entities.Testimonial.update(t.id, { applause_count: (t.applause_count || 0) + 1 }).catch(() => {});
   };
 
   if (testimonials.length === 0) return null;

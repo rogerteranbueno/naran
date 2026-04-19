@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, LogOut, BookOpen, Clock, Trash2, Pencil, Check, X, Bell, BellOff, Heart, Users } from 'lucide-react';
+import { LogOut, BookOpen, Clock, Trash2, Pencil, Check, X, Bell, BellOff, Heart, Users } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import BadgesSection from '@/components/BadgesSection';
@@ -90,16 +90,8 @@ export default function Profile() {
     <div className="flex-1 flex flex-col"
       style={{ background: 'radial-gradient(ellipse at 50% 0%, rgba(224,122,95,0.10) 0%, #FDFBF7 60%)' }}>
 
-      {/* Header */}
-      <div className="flex items-center px-5 pt-10 pb-6">
-        <button
-          onClick={() => navigate('/home')}
-          className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span className="text-sm">Volver</span>
-        </button>
-      </div>
+      {/* Header spacer */}
+      <div className="h-4" />
 
       <div className="flex-1 px-5 pb-10 space-y-5">
         {/* User info + avatar + goal */}

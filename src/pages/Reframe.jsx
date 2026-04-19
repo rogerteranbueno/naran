@@ -94,14 +94,16 @@ export default function Reframe() {
   };
 
   const handleSave = async () => {
-    setSaving(true);
-    const result = await saveLog({ original_text: originalText, cognitive_note: cognitiveNote, reframe_message: reframeMessage, action_taken: 'saved' });
+    // Optimistic UI: show success immediately
     setSaved(true);
+    setSaving(true);
+    showToast(navigator.onLine ? 'Guardado en historial ✓' : 'Sin conexión. Se sincronizará luego ✓');
+    
+    const result = await saveLog({ original_text: originalText, cognitive_note: cognitiveNote, reframe_message: reframeMessage, action_taken: 'saved' });
     setSaving(false);
+    
     if (result === 'demo') {
       showToast('Regístrate para guardar tu progreso y llevar un historial real.');
-    } else {
-      showToast(navigator.onLine ? 'Guardado en historial ✓' : 'Sin conexión. Se sincronizará luego ✓');
     }
   };
 

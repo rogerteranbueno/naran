@@ -127,13 +127,6 @@ export default function Historial() {
   return (
     <div className="flex-1 flex flex-col">
       <div className="flex items-center gap-3 px-5 pt-8 pb-5">
-        <button
-          onClick={() => navigate('/home')}
-          className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors touch-none select-none"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span className="text-sm">Volver</span>
-        </button>
         <p className="flex-1 text-center text-sm font-medium text-foreground">
           Historial
         </p>

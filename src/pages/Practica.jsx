@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Send, Loader2, ChevronDown, ChevronUp } from 'lucide-react';
+import { Send, Loader2, ChevronDown, ChevronUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 
@@ -100,13 +100,7 @@ Da UN solo consejo alentador y práctico en 1-2 frases. Sé cálido y específic
     return (
       <div className="flex-1 flex flex-col"
         style={{ background: 'radial-gradient(ellipse at 50% 0%, rgba(224,122,95,0.10) 0%, #FDFBF7 65%)' }}>
-        <div className="flex items-center px-5 pt-10 pb-6">
-          <button onClick={() => navigate('/home')}
-            className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors">
-            <ArrowLeft className="w-4 h-4" />
-            <span className="text-sm">Volver</span>
-          </button>
-        </div>
+        <div className="h-4" />
 
         <div className="flex-1 px-5 pb-10 overflow-y-auto">
           <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="mb-8">

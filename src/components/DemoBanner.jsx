@@ -19,8 +19,8 @@ export default function DemoBanner() {
       initial={{ y: 80, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ delay: 0.5, type: 'spring', stiffness: 260, damping: 22 }}
-      className="fixed left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2.5rem)] max-w-sm"
-      style={{ bottom: 'calc(5rem + env(safe-area-inset-bottom, 0px))' }}
+      className="fixed left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2.5rem)] max-w-sm pointer-events-auto"
+      style={{ bottom: 'max(5rem, calc(5rem + env(safe-area-inset-bottom, 0px)))' }}
     >
       <div className="bg-white rounded-2xl shadow-xl border border-border/40 px-4 py-3 flex items-center gap-3">
         <Sparkles className="w-4 h-4 shrink-0" style={{ color: '#E07A5F' }} />
