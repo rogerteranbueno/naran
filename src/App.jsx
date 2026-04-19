@@ -22,16 +22,10 @@ import Unirse from '@/pages/Unirse';
 import BibliotecaAuditiva from '@/pages/BibliotecaAuditiva';
 import Admin from '@/pages/Admin';
 
-// Sync .dark class with system preference
+// Ensure app always uses light theme
 function SystemThemeSync() {
   useEffect(() => {
-    const mq = window.matchMedia('(prefers-color-scheme: dark)');
-    const apply = (e) => {
-      document.documentElement.classList.toggle('dark', e.matches);
-    };
-    apply(mq);
-    mq.addEventListener('change', apply);
-    return () => mq.removeEventListener('change', apply);
+    document.documentElement.classList.remove('dark');
   }, []);
   return null;
 }
