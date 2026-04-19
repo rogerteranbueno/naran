@@ -129,8 +129,10 @@
 }
 
 /* Mobile UX */
-html, body {
+html, body, #root {
   overscroll-behavior: none;
+  background-color: #FDFBF7;
+  min-height: 100%;
 }
 
 button, a, label, [role="button"] {
