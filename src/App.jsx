@@ -7,6 +7,7 @@ import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect } from 'react';
+import { TabStackProvider } from '@/lib/TabStackContext';
 
 // Sync dark mode with system preference
 function SystemThemeSync() {
@@ -108,11 +109,13 @@ function App() {
   return (
     <AuthProvider>
       <QueryClientProvider client={queryClientInstance}>
-        <SystemThemeSync />
-        <Router>
-          <AuthenticatedApp />
-        </Router>
-        <Toaster />
+        <TabStackProvider>
+          <SystemThemeSync />
+          <Router>
+            <AuthenticatedApp />
+          </Router>
+          <Toaster />
+        </TabStackProvider>
       </QueryClientProvider>
     </AuthProvider>
   )

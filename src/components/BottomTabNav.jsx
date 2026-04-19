@@ -2,6 +2,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Home, History, Dumbbell, User } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useEffect } from 'react';
+import { useTabStack } from '@/lib/TabStackContext';
 
 const TABS = [
   { path: '/home', label: 'Inicio', icon: Home },
@@ -13,25 +14,26 @@ const TABS = [
 export default function BottomTabNav() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
+  const { saveScroll, getScroll } = useTabStack();
 
   // Preserve scroll position when switching tabs
   useEffect(() => {
     const scrollContainer = document.querySelector(`[data-scroll-container]`);
     if (!scrollContainer) return;
 
-    // Restore scroll from previous tab
-    const saved = sessionStorage.getItem(`tab_scroll_${pathname}`);
-    if (saved) {
+    // Restore scroll from tab stack
+    const savedScroll = getScroll(pathname);
+    if (savedScroll > 0) {
       setTimeout(() => {
-        scrollContainer.scrollTop = parseInt(saved, 10);
+        scrollContainer.scrollTop = savedScroll;
       }, 50);
     }
 
     // Save scroll before leaving tab
     return () => {
-      sessionStorage.setItem(`tab_scroll_${pathname}`, scrollContainer.scrollTop || 0);
+      saveScroll(pathname, scrollContainer.scrollTop || 0);
     };
-  }, [pathname]);
+  }, [pathname, saveScroll, getScroll]);
 
   return (
     <motion.div

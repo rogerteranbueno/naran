@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, BookmarkPlus, Share2, Check, ChevronDown, ChevronUp } from 'lucide-react';
+import { BookmarkPlus, Share2, Check } from 'lucide-react';
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
@@ -99,12 +99,19 @@ export default function Reframe() {
     setSaving(true);
     showToast(navigator.onLine ? 'Guardado en historial ✓' : 'Sin conexión. Se sincronizará luego ✓');
     
-    const result = await saveLog({ original_text: originalText, cognitive_note: cognitiveNote, reframe_message: reframeMessage, action_taken: 'saved' });
-    setSaving(false);
-    
-    if (result === 'demo') {
-      showToast('Regístrate para guardar tu progreso y llevar un historial real.');
+    try {
+      const result = await saveLog({ original_text: originalText, cognitive_note: cognitiveNote, reframe_message: reframeMessage, action_taken: 'saved' });
+      if (result !== 'demo') {
+        // Keep saved state and checkmark visible
+      } else {
+        showToast('Regístrate para guardar tu progreso y llevar un historial real.');
+      }
+    } catch {
+      // Network error but UI already shows saved (optimistic)
+      setSaved(false);
+      setSaving(false);
     }
+    setSaving(false);
   };
 
   const handleShare = async () => {
@@ -123,16 +130,8 @@ export default function Reframe() {
     <div className="flex-1 flex flex-col"
       style={{ background: 'radial-gradient(ellipse at 50% 0%, rgba(224,122,95,0.10) 0%, #FDFBF7 65%)' }}>
 
-      {/* Header */}
-      <div className="flex items-center px-5 pt-10 pb-6">
-        <button
-          onClick={() => navigate('/home')}
-          className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span className="text-sm">Volver</span>
-        </button>
-      </div>
+      {/* Header spacer */}
+      <div className="h-4" />
 
       <div className="flex-1 flex flex-col px-5 pb-6 overflow-y-auto">
         {/* Original (crossed out) */}
