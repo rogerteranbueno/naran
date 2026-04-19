@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Mic, History, Heart, Users, ArrowRight, Sparkles } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 const FEATURES = [
   {
@@ -34,10 +34,16 @@ const FEATURES = [
 
 export default function Landing() {
   const navigate = useNavigate();
+  const [authed, setAuthed] = useState(false);
 
+  useEffect(() => {
+    base44.auth.isAuthenticated().then(setAuthed);
+  }, []);
 
-
-  const handleLogin = () => base44.auth.redirectToLogin('/home');
+  const handleLogin = () => {
+    if (authed) navigate('/home');
+    else base44.auth.redirectToLogin('/home');
+  };
   const handleDemo = () => navigate('/demo');
 
   return (
@@ -50,7 +56,7 @@ export default function Landing() {
           onClick={handleLogin}
           className="text-sm font-medium px-4 py-2 rounded-xl border border-border/60 hover:bg-secondary/60 transition-colors"
         >
-          Iniciar sesión
+          {authed ? 'Ir a la app →' : 'Iniciar sesión'}
         </button>
       </nav>
 
@@ -81,7 +87,7 @@ export default function Landing() {
               className="h-14 px-8 rounded-2xl text-white text-base font-semibold flex items-center justify-center gap-2 transition-all active:scale-95"
               style={{ background: '#E07A5F', boxShadow: '0 8px 24px rgba(224,122,95,0.35)' }}
             >
-              Crear cuenta gratis
+              {authed ? 'Ir a mi app →' : 'Crear cuenta gratis'}
               <ArrowRight className="w-4 h-4" />
             </button>
             <button
@@ -137,7 +143,7 @@ export default function Landing() {
             className="w-full h-14 rounded-2xl text-white text-base font-semibold transition-all active:scale-95"
             style={{ background: '#E07A5F', boxShadow: '0 8px 24px rgba(224,122,95,0.30)' }}
           >
-            Crear mi cuenta gratis 🍊
+            {authed ? 'Ir a mi app 🍊' : 'Crear mi cuenta gratis 🍊'}
           </button>
           <p className="text-xs text-muted-foreground/50 mt-4">
             © 2025 Naran · Comunicación de pareja con IA
