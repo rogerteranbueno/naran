@@ -12,6 +12,8 @@ import MicPermissionCard from '@/components/MicPermissionCard';
 import Onboarding from '@/components/Onboarding';
 import StreakCounter from '@/components/StreakCounter';
 import TestimonialWall from '@/components/TestimonialWall';
+import HomeTour from '@/components/HomeTour';
+import DemoBottomSheet from '@/components/DemoBottomSheet';
 
 const AGGRESSIVE_RE = /\b(eres\s+un[a]?\s+\w+)\b/i;
 
@@ -41,6 +43,8 @@ export default function Home() {
   const textareaRef = useRef(null);
 
   const [showOnboarding, setShowOnboarding] = useState(!localStorage.getItem('naran_onboarded'));
+  const [showTour, setShowTour] = useState(!localStorage.getItem('naran_onboarded_v2') && !!localStorage.getItem('naran_onboarded'));
+  const [showDemoSheet, setShowDemoSheet] = useState(false);
   const [tapMode, setTapMode] = useState(false);
 
   // Sync offline logs when back online
@@ -74,6 +78,13 @@ export default function Home() {
 
     setAnalyzing(true);
     const result = await analyzeText(trimmed);
+
+    // Show demo bottom sheet after first reframe in demo mode
+    if (isDemoMode() && !localStorage.getItem('naran_demo_sheet_shown')) {
+      localStorage.setItem('naran_demo_sheet_shown', '1');
+      setShowDemoSheet(true);
+    }
+
     navigate('/reframe', {
       state: {
         original_text: trimmed,
@@ -158,7 +169,7 @@ export default function Home() {
 
         {/* Mic button */}
         {browserSupported && (
-          <div className="flex flex-col items-center gap-4 touch-none select-none">
+          <div id="home-mic" className="flex flex-col items-center gap-4 touch-none select-none">
             <OrangeMicButton
               isListening={listening}
               onTap={handleMicToggle}
@@ -230,6 +241,7 @@ export default function Home() {
             >
               {!showText ? (
                 <button
+                  id="home-write"
                   onClick={handleShowText}
                   className="flex items-center gap-2 mx-auto text-xs text-muted-foreground/50 hover:text-muted-foreground transition-colors touch-none select-none"
                 >
@@ -270,7 +282,8 @@ export default function Home() {
           )}
         </AnimatePresence>
       </div>
-      {isDemoMode() && <DemoBanner />}
+      {showTour && <HomeTour onDone={() => setShowTour(false)} />}
+      {isDemoMode() && <DemoBottomSheet visible={showDemoSheet} onDismiss={() => setShowDemoSheet(false)} />}
     </div>
   );
 }

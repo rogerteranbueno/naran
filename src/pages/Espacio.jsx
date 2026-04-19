@@ -6,7 +6,7 @@ import { base44 } from '@/api/base44Client';
 
 function generateCode() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  return 'NR-' + Array.from({ length: 4 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+  return 'NARAN-' + Array.from({ length: 4 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
 }
 
 export default function Espacio() {
@@ -124,16 +124,21 @@ export default function Espacio() {
         {/* Sin relación: invitar */}
         {!relationship && (
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-            className="bg-white rounded-3xl px-5 py-6 border border-border/40 shadow-sm text-center space-y-4">
-            <div className="w-16 h-16 rounded-2xl mx-auto flex items-center justify-center text-4xl" style={{ background: 'rgba(224,122,95,0.10)' }}>🍊</div>
+            className="bg-white rounded-3xl px-5 py-6 border border-border/40 shadow-sm text-center space-y-5">
+            {/* Ilustración dos naranjas */}
+            <div className="flex items-center justify-center gap-1 text-5xl">
+              <span style={{ transform: 'scaleX(-1)', display: 'inline-block' }}>🍊</span>
+              <span className="text-2xl text-muted-foreground/40">·</span>
+              <span>🍊</span>
+            </div>
             <div>
-              <p className="font-semibold text-foreground mb-1">Invita a tu pareja</p>
-              <p className="text-sm text-muted-foreground leading-relaxed">Conecta con tu pareja para ver métricas compartidas y crecer juntos.</p>
+              <p className="font-semibold text-foreground mb-2">Naran es mejor en equipo.</p>
+              <p className="text-sm text-muted-foreground leading-relaxed">Invita a tu persona favorita a construir un espacio de calma juntos.</p>
             </div>
             <button onClick={createRelationship}
-              className="w-full h-12 rounded-2xl text-white text-sm font-medium"
-              style={{ background: '#E07A5F' }}>
-              Generar invitación
+              className="w-full h-12 rounded-2xl text-white text-sm font-semibold transition-all active:scale-95 touch-none select-none"
+              style={{ background: '#E07A5F', boxShadow: '0 6px 20px rgba(224,122,95,0.30)' }}>
+              Crear invitación especial ✨
             </button>
           </motion.div>
         )}
@@ -153,8 +158,10 @@ export default function Espacio() {
             </div>
             {/* Código grande */}
             <div className="rounded-2xl px-4 py-4 text-center" style={{ background: 'rgba(224,122,95,0.08)' }}>
-              <p className="text-xs text-muted-foreground mb-1">Código de invitación</p>
-              <p className="text-3xl font-bold tracking-widest text-primary">{relationship.invite_code}</p>
+              <p className="text-xs text-muted-foreground mb-1">Tu código de conexión</p>
+              <p className="text-2xl font-bold tracking-widest text-primary">{relationship.invite_code} 🍊</p>
+              <p className="text-xs text-muted-foreground mt-2">Comparte este enlace mágico:</p>
+              <p className="text-xs text-primary/70 mt-1 break-all">{window.location.origin}/unirse?code={relationship.invite_code}</p>
             </div>
             {/* Botones de compartir */}
             <div className="flex gap-2">

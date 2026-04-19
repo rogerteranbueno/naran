@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Check, Heart } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
+import confetti from 'canvas-confetti';
 
 export default function Unirse() {
   const navigate = useNavigate();
@@ -47,7 +48,9 @@ export default function Unirse() {
 
     await base44.entities.Relationship.update(rel.id, { user2_email: user.email, status: 'active' });
     setStatus('success');
-    setTimeout(() => navigate('/espacio'), 2000);
+    // Confetti celebration
+    confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 }, colors: ['#E07A5F', '#F0916F', '#FDFBF7', '#C9614A'] });
+    setTimeout(() => navigate('/espacio'), 3000);
   };
 
   return (
@@ -65,11 +68,15 @@ export default function Unirse() {
         )}
 
         {status === 'success' && (
-          <motion.div initial={{ scale: 0.8 }} animate={{ scale: 1 }} className="space-y-3">
+          <motion.div initial={{ scale: 0.8 }} animate={{ scale: 1 }} className="space-y-4">
             <div className="text-5xl">🍊❤️🍊</div>
-            <p className="font-semibold text-foreground text-lg">¡Estáis conectados!</p>
-            {inviterName && <p className="text-sm text-muted-foreground">Tú y <strong>{inviterName}</strong> ahora comparten un espacio en Naran.</p>}
-            <p className="text-sm text-muted-foreground">Redirigiendo a vuestro espacio…</p>
+            <p className="font-semibold text-foreground text-lg">
+              {inviterName ? `¡Has sido invitado/a al Espacio de ${inviterName}!` : '¡Estáis conectados!'}
+            </p>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              Ya estáis conectados. A construir puentes, no muros. 🌉
+            </p>
+            <p className="text-xs text-muted-foreground">Redirigiendo a vuestro espacio…</p>
           </motion.div>
         )}
 
