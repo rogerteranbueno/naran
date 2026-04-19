@@ -121,13 +121,14 @@ Devuelve un JSON con:
 
   return (
     <div className="flex-1 flex flex-col relative overflow-hidden"
-      style={{ background: 'radial-gradient(ellipse at 50% 30%, rgba(224,122,95,0.12) 0%, #FDFBF7 70%)' }}>
+      style={{ background: '#FDFBF7', color: '#2C2C2C' }}>
 
       {/* Header */}
       <div className="flex items-center justify-between px-5 pt-10 pb-4">
         <button
           onClick={() => step === 'elegir' ? navigate('/') : setStep('elegir')}
-          className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
+          className="flex items-center gap-1.5 transition-colors"
+          style={{ color: '#6B6560' }}
         >
           <ArrowLeft className="w-4 h-4" />
           <span className="text-sm">Volver</span>
@@ -150,8 +151,8 @@ Devuelve un JSON con:
           >
             <div className="text-center mb-8">
               <p className="text-3xl mb-3">🍊</p>
-              <h1 className="text-xl font-semibold text-foreground mb-2">Prueba Naran ahora</h1>
-              <p className="text-sm text-muted-foreground leading-relaxed">
+              <h1 className="text-xl font-semibold mb-2" style={{ color: '#1A1A1A' }}>Prueba Naran ahora</h1>
+              <p className="text-sm leading-relaxed" style={{ color: '#6B6560' }}>
                 Elige un escenario real o escribe el tuyo. Naran lo transformará en un mensaje de conexión.
               </p>
             </div>
@@ -162,15 +163,16 @@ Devuelve un JSON con:
                   key={s.id}
                   whileTap={{ scale: 0.97 }}
                   onClick={() => handleSelectScenario(s)}
-                  className="w-full text-left rounded-2xl border border-border/60 bg-white px-4 py-4 shadow-sm hover:border-primary/30 hover:shadow-md transition-all"
+                  className="w-full text-left rounded-2xl px-4 py-4 shadow-sm transition-all"
+                  style={{ background: '#FFFFFF', border: '1px solid #EDE8E0' }}
                 >
                   <div className="flex items-start gap-3">
                     <span className="text-2xl shrink-0">{s.emoji}</span>
                     <div>
-                      <p className="text-sm font-medium text-foreground mb-1">{s.label}</p>
-                      <p className="text-xs text-muted-foreground italic leading-relaxed">"{s.text}"</p>
+                      <p className="text-sm font-medium mb-1" style={{ color: '#1A1A1A' }}>{s.label}</p>
+                      <p className="text-xs italic leading-relaxed" style={{ color: '#6B6560' }}>"{s.text}"</p>
                     </div>
-                    <ArrowRight className="w-4 h-4 text-muted-foreground/40 shrink-0 mt-0.5 ml-auto" />
+                    <ArrowRight className="w-4 h-4 shrink-0 mt-0.5 ml-auto" style={{ color: '#C4BCB4' }} />
                   </div>
                 </motion.button>
               ))}
@@ -193,7 +195,8 @@ Devuelve un JSON con:
                     onChange={e => setCustomText(e.target.value)}
                     placeholder="Escribe exactamente lo que quisieras decir…"
                     rows={3}
-                    className="w-full resize-none rounded-2xl border border-border/60 bg-white px-4 py-3 text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground/40 shadow-sm"
+                    className="w-full resize-none rounded-2xl px-4 py-3 text-sm leading-relaxed focus:outline-none shadow-sm"
+                    style={{ background: '#FFFFFF', border: '1px solid #EDE8E0', color: '#2C2C2C' }}
                     autoFocus
                   />
                   {customText.trim() && (
@@ -212,8 +215,8 @@ Devuelve un JSON con:
             </div>
 
             {/* CTA registro */}
-            <div className="rounded-2xl border border-primary/20 px-4 py-4 text-center" style={{ background: 'rgba(224,122,95,0.06)' }}>
-              <p className="text-xs text-muted-foreground mb-3 leading-relaxed">
+            <div className="rounded-2xl px-4 py-4 text-center" style={{ background: 'rgba(224,122,95,0.08)', border: '1px solid rgba(224,122,95,0.20)' }}>
+              <p className="text-xs mb-3 leading-relaxed" style={{ color: '#6B6560' }}>
                 Regístrate gratis para guardar tu historial, llevar una racha y usar el modo de voz.
               </p>
               <button
@@ -244,8 +247,8 @@ Devuelve un JSON con:
               🍊
             </motion.div>
             <div className="text-center space-y-2">
-              <p className="text-lg font-medium text-foreground tracking-wide">Naran está escuchando…</p>
-              <p className="text-sm text-muted-foreground leading-relaxed">Un momento de pausa para una mejor conexión.</p>
+              <p className="text-lg font-medium tracking-wide" style={{ color: '#1A1A1A' }}>Naran está escuchando…</p>
+              <p className="text-sm leading-relaxed" style={{ color: '#6B6560' }}>Un momento de pausa para una mejor conexión.</p>
             </div>
             <div className="flex gap-1.5">
               {[0, 0.2, 0.4].map((delay, i) => (
@@ -268,26 +271,26 @@ Devuelve un JSON con:
           >
             {/* Original tachado */}
             <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="mb-5">
-              <p className="text-xs text-muted-foreground/60 mb-2 uppercase tracking-wide font-medium">Lo que ibas a decir</p>
+              <p className="text-xs mb-2 uppercase tracking-wide font-medium" style={{ color: '#A89F97' }}>Lo que ibas a decir</p>
               <div className="rounded-2xl px-4 py-3" style={{ background: '#F0EDE6' }}>
-                <p className="text-sm text-muted-foreground/60 leading-relaxed line-through italic">"{selected?.text}"</p>
+                <p className="text-sm leading-relaxed line-through italic" style={{ color: '#A89F97' }}>"{selected?.text}"</p>
               </div>
             </motion.div>
 
             {/* Nota cognitiva */}
             {cognitiveNote && (
               <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 }} className="mb-5">
-                <p className="text-xs font-semibold text-primary/70 uppercase tracking-wide mb-2">Lo que hay detrás</p>
-                <div className="rounded-xl px-4 py-3 border border-primary/15" style={{ background: 'rgba(224,122,95,0.08)' }}>
-                  <p className="text-sm text-foreground/80 leading-relaxed">{cognitiveNote}</p>
+                <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: '#E07A5F' }}>Lo que hay detrás</p>
+                <div className="rounded-xl px-4 py-3" style={{ background: 'rgba(224,122,95,0.08)', border: '1px solid rgba(224,122,95,0.15)' }}>
+                  <p className="text-sm leading-relaxed" style={{ color: '#2C2C2C' }}>{cognitiveNote}</p>
                 </div>
               </motion.div>
             )}
 
             {/* Reframe editable */}
             <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }} className="mb-6">
-              <p className="text-xs text-muted-foreground/60 uppercase tracking-wide font-medium mb-3">Naran sugiere</p>
-              <div className="rounded-3xl bg-white border-2 border-primary/20 shadow-sm overflow-hidden focus-within:border-primary/50 transition-colors">
+              <p className="text-xs uppercase tracking-wide font-medium mb-3" style={{ color: '#A89F97' }}>Naran sugiere</p>
+              <div className="rounded-3xl shadow-sm overflow-hidden transition-colors" style={{ background: '#FFFFFF', border: '2px solid rgba(224,122,95,0.20)' }}>
                 <textarea
                   value={reframeText}
                   onChange={e => setReframeText(e.target.value)}
@@ -296,8 +299,8 @@ Devuelve un JSON con:
                   style={{ color: '#2C2C2C' }}
                 />
               </div>
-              <div className="mt-3 rounded-xl px-4 py-3 bg-muted/40 border border-muted/60">
-                <p className="text-xs text-muted-foreground leading-relaxed italic">
+              <div className="mt-3 rounded-xl px-4 py-3" style={{ background: '#F5F2EC', border: '1px solid #EDE8E0' }}>
+                <p className="text-xs leading-relaxed italic" style={{ color: '#6B6560' }}>
                   "Expresar lo que necesitas en lugar de lo que el otro hizo mal abre una puerta."
                 </p>
               </div>
@@ -308,13 +311,15 @@ Devuelve un JSON con:
               className="flex gap-3 mb-6">
               <button
                 onClick={() => { navigator.clipboard.writeText(reframeText).catch(() => {}); showToast('Copiado ✓'); }}
-                className="flex-1 h-12 rounded-2xl border border-border/60 bg-white text-sm text-muted-foreground flex items-center justify-center gap-2 hover:bg-secondary/40 transition-colors"
+                className="flex-1 h-12 rounded-2xl text-sm flex items-center justify-center gap-2 transition-colors"
+                style={{ background: '#FFFFFF', border: '1px solid #EDE8E0', color: '#6B6560' }}
               >
                 <Share2 className="w-4 h-4" /> Copiar
               </button>
               <button
                 onClick={() => { showToast('Regístrate para guardar tu historial completo →'); }}
-                className="flex-1 h-12 rounded-2xl border border-border/60 bg-white text-sm text-muted-foreground flex items-center justify-center gap-2 hover:bg-secondary/40 transition-colors"
+                className="flex-1 h-12 rounded-2xl text-sm flex items-center justify-center gap-2 transition-colors"
+                style={{ background: '#FFFFFF', border: '1px solid #EDE8E0', color: '#6B6560' }}
               >
                 <BookmarkPlus className="w-4 h-4" /> Guardar
               </button>
@@ -322,8 +327,8 @@ Devuelve un JSON con:
 
             {/* Comparación antes/después visual */}
             <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.28 }}
-              className="rounded-2xl border border-border/40 bg-white p-4 mb-6 shadow-sm">
-              <p className="text-xs font-semibold text-foreground mb-3 uppercase tracking-wide">Antes vs Después</p>
+              className="rounded-2xl p-4 mb-6 shadow-sm" style={{ background: '#FFFFFF', border: '1px solid #EDE8E0' }}>
+              <p className="text-xs font-semibold mb-3 uppercase tracking-wide" style={{ color: '#1A1A1A' }}>Antes vs Después</p>
               <div className="space-y-3">
                 <div className="rounded-xl px-3 py-2.5" style={{ background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.15)' }}>
                   <p className="text-[11px] font-medium text-red-500 mb-1">❌ Ataca / Generaliza</p>
@@ -342,10 +347,10 @@ Devuelve un JSON con:
             {/* CTA registro destacado */}
             <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}
               className="rounded-2xl p-5 text-center mb-4"
-              style={{ background: 'linear-gradient(135deg, rgba(224,122,95,0.12) 0%, rgba(224,122,95,0.05) 100%)', border: '1.5px solid rgba(224,122,95,0.25)' }}>
+              style={{ background: 'rgba(224,122,95,0.08)', border: '1.5px solid rgba(224,122,95,0.25)' }}>
               <p className="text-2xl mb-2">🍊</p>
-              <p className="text-sm font-semibold text-foreground mb-1">¿Quieres esto en tu vida?</p>
-              <p className="text-xs text-muted-foreground mb-4 leading-relaxed">
+              <p className="text-sm font-semibold mb-1" style={{ color: '#1A1A1A' }}>¿Quieres esto en tu vida?</p>
+              <p className="text-xs mb-4 leading-relaxed" style={{ color: '#6B6560' }}>
                 Guarda tu historial, lleva una racha diaria, usa el modo de voz y conecta con tu pareja.
               </p>
               <button
@@ -357,7 +362,8 @@ Devuelve un JSON con:
               </button>
               <button
                 onClick={() => setStep('elegir')}
-                className="mt-2 w-full h-10 rounded-xl text-xs text-muted-foreground hover:text-foreground transition-colors"
+                className="mt-2 w-full h-10 rounded-xl text-xs transition-colors"
+                style={{ color: '#6B6560' }}
               >
                 Probar otro escenario
               </button>
@@ -374,7 +380,8 @@ Devuelve un JSON con:
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
-            className="fixed bottom-28 left-1/2 -translate-x-1/2 bg-foreground text-background text-sm px-5 py-3 rounded-2xl shadow-xl z-50 whitespace-nowrap"
+            className="fixed bottom-28 left-1/2 -translate-x-1/2 text-sm px-5 py-3 rounded-2xl shadow-xl z-50 whitespace-nowrap"
+            style={{ background: '#2C2C2C', color: '#FDFBF7' }}
           >
             {toast}
           </motion.div>
