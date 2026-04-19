@@ -8,6 +8,20 @@ import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect } from 'react';
 
+// Sync dark mode with system preference
+function SystemThemeSync() {
+  useEffect(() => {
+    const apply = (dark) => {
+      document.documentElement.classList.toggle('dark', dark);
+    };
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    apply(mq.matches);
+    mq.addEventListener('change', (e) => apply(e.matches));
+    return () => mq.removeEventListener('change', (e) => apply(e.matches));
+  }, []);
+  return null;
+}
+
 import MobileLayout from '@/components/MobileLayout';
 import Welcome from '@/pages/Welcome';
 import Home from '@/pages/Home';
@@ -87,6 +101,7 @@ function App() {
   return (
     <AuthProvider>
       <QueryClientProvider client={queryClientInstance}>
+        <SystemThemeSync />
         <Router>
           <AuthenticatedApp />
         </Router>

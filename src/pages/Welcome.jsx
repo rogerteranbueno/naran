@@ -33,8 +33,8 @@ export default function Welcome() {
   };
 
   return (
-    <div className="flex-1 flex flex-col justify-between px-6 py-12"
-      style={{ background: 'radial-gradient(ellipse at 50% 30%, rgba(224,122,95,0.12) 0%, #FDFBF7 70%)' }}>
+    <div className="flex-1 flex flex-col justify-between px-6"
+      style={{ background: 'radial-gradient(ellipse at 50% 30%, rgba(224,122,95,0.12) 0%, #FDFBF7 70%)', paddingTop: 'max(3rem, env(safe-area-inset-top))', paddingBottom: '3rem' }}>
       {/* Top section */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}

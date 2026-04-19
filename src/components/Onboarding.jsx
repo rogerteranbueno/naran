@@ -28,8 +28,8 @@ Reescribe el mensaje de forma empática y asertiva en primera persona (máx 2 fr
   };
 
   return (
-    <div className="flex-1 flex flex-col items-center justify-center px-8 py-16 min-h-screen"
-      style={{ background: 'radial-gradient(ellipse at center, rgba(224,122,95,0.15) 0%, #FDFBF7 70%)' }}>
+    <div className="flex-1 flex flex-col items-center justify-center px-8 min-h-screen"
+      style={{ background: 'radial-gradient(ellipse at center, rgba(224,122,95,0.15) 0%, #FDFBF7 70%)', paddingTop: 'max(4rem, env(safe-area-inset-top))', paddingBottom: '4rem' }}>
 
       <AnimatePresence mode="wait">
         {!reframe ? (
