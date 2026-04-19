@@ -75,24 +75,23 @@ export default function Landing() {
             usando inteligencia artificial y psicología de pareja.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <div className="flex flex-col gap-3 justify-center w-full max-w-xs mx-auto">
             <button
-              onClick={handleDemo}
-              className="h-13 px-8 py-3.5 rounded-2xl text-white text-base font-semibold flex items-center justify-center gap-2 transition-all active:scale-95"
+              onClick={handleLogin}
+              className="h-14 px-8 rounded-2xl text-white text-base font-semibold flex items-center justify-center gap-2 transition-all active:scale-95"
               style={{ background: '#E07A5F', boxShadow: '0 8px 24px rgba(224,122,95,0.35)' }}
             >
-              Probar gratis ahora
+              Crear cuenta gratis
               <ArrowRight className="w-4 h-4" />
             </button>
             <button
-              onClick={handleLogin}
-              className="h-13 px-8 py-3.5 rounded-2xl text-sm font-medium border-2 transition-colors"
-              style={{ borderColor: '#E07A5F', color: '#E07A5F' }}
+              onClick={handleDemo}
+              className="h-11 px-8 rounded-2xl text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
             >
-              Crear cuenta
+              Ver demo sin registro →
             </button>
           </div>
-          <p className="text-xs text-muted-foreground/60 mt-4">Sin tarjeta de crédito · Gratis para empezar</p>
+          <p className="text-xs text-muted-foreground/60 mt-2">Sin tarjeta de crédito · Gratis para empezar</p>
         </motion.div>
       </section>
 
@@ -134,11 +133,11 @@ export default function Landing() {
           className="mt-10 text-center"
         >
           <button
-            onClick={handleDemo}
+            onClick={handleLogin}
             className="w-full h-14 rounded-2xl text-white text-base font-semibold transition-all active:scale-95"
             style={{ background: '#E07A5F', boxShadow: '0 8px 24px rgba(224,122,95,0.30)' }}
           >
-            Empieza ahora — es gratis 🍊
+            Crear mi cuenta gratis 🍊
           </button>
           <p className="text-xs text-muted-foreground/50 mt-4">
             © 2025 Naran · Comunicación de pareja con IA
