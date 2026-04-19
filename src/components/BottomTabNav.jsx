@@ -29,7 +29,7 @@ export default function BottomTabNav() {
           return (
             <button
               key={tab.path}
-              onClick={() => navigate(tab.path)}
+              onClick={() => navigate(tab.path, { replace: isActive })}
               aria-label={tab.label}
               className="flex flex-col items-center justify-center gap-1 flex-1 h-full transition-colors touch-none select-none"
             >

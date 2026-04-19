@@ -23,13 +23,7 @@ import BibliotecaAuditiva from '@/pages/BibliotecaAuditiva';
 import Admin from '@/pages/Admin';
 import Demo from '@/pages/Demo';
 
-// Ensure app always uses light theme
-function SystemThemeSync() {
-  useEffect(() => {
-    document.documentElement.classList.remove('dark');
-  }, []);
-  return null;
-}
+
 
 // Animated page wrapper
 function AnimatedRoutes({ children }) {
@@ -93,7 +87,6 @@ function App() {
   return (
     <AuthProvider>
       <QueryClientProvider client={queryClientInstance}>
-        <SystemThemeSync />
         <Router>
           <AuthenticatedApp />
         </Router>

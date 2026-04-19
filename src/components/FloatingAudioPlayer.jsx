@@ -53,8 +53,8 @@ export default function FloatingAudioPlayer({ audio, onClose }) {
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 100, opacity: 0 }}
             transition={{ type: 'spring', damping: 28, stiffness: 280 }}
-            className="fixed bottom-20 left-4 right-4 z-50 rounded-2xl border shadow-xl overflow-hidden"
-            style={{ background: '#FDFBF7', borderColor: '#E0DCD3' }}
+            className="fixed left-4 right-4 z-50 rounded-2xl border shadow-xl overflow-hidden"
+            style={{ background: '#FDFBF7', borderColor: '#E0DCD3', bottom: 'calc(5rem + env(safe-area-inset-bottom, 0px))' }}
           >
             <div className="flex items-center gap-3 px-4 py-3">
               <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl shrink-0"
@@ -93,8 +93,8 @@ export default function FloatingAudioPlayer({ audio, onClose }) {
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 100, opacity: 0 }}
           transition={{ type: 'spring', damping: 28, stiffness: 280 }}
-          className="fixed bottom-20 left-4 right-4 z-50 rounded-2xl border shadow-xl overflow-hidden"
-          style={{ background: '#FDFBF7', borderColor: '#E0DCD3' }}
+          className="fixed left-4 right-4 z-50 rounded-2xl border shadow-xl overflow-hidden"
+          style={{ background: '#FDFBF7', borderColor: '#E0DCD3', bottom: 'calc(5rem + env(safe-area-inset-bottom, 0px))' }}
         >
           <audio
             ref={audioRef}
