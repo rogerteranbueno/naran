@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import { humanizeDiagnosis } from '@/lib/humanizeDiagnosis';
 import TestimonialPrompt from '@/components/TestimonialPrompt';
+import { saveLogOffline } from '@/utils/offlineStorage';
 
 const GOTTMAN_TIPS = {
   'crítica': 'Inicio suave: habla de TU sentimiento, no del defecto del otro.',
@@ -26,14 +27,19 @@ function getGottmanTip(note = '') {
 
 async function saveLog({ original_text, cognitive_note, reframe_message, action_taken }) {
   const user = await base44.auth.me().catch(() => null);
-  await base44.entities.ConflictLog.create({
+  const logData = {
     user_email: user?.email || '',
     original_text,
     cognitive_note,
     reframe_message,
     action_taken,
     status: 'pending',
-  });
+  };
+  if (navigator.onLine) {
+    await base44.entities.ConflictLog.create(logData);
+  } else {
+    await saveLogOffline(logData);
+  }
 }
 
 export default function Reframe() {
@@ -85,7 +91,7 @@ export default function Reframe() {
     await saveLog({ original_text: originalText, cognitive_note: cognitiveNote, reframe_message: reframeMessage, action_taken: 'saved' });
     setSaved(true);
     setSaving(false);
-    showToast('Guardado en historial ✓');
+    showToast(navigator.onLine ? 'Guardado en historial ✓' : 'Sin conexión. Se sincronizará luego ✓');
   };
 
   const handleShare = async () => {

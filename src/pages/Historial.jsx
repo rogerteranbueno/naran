@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, RefreshCw } from 'lucide-react';
+import { ArrowLeft, RefreshCw, FileDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import WeeklyChart from '@/components/WeeklyChart';
+import { generateWeeklyPDF } from '@/utils/generateReport';
 
 function timeAgo(dateStr) {
   const diffMs = Date.now() - new Date(dateStr).getTime();
@@ -30,11 +31,19 @@ function getEmoji(cognitiveNote = '') {
 const PAGE_SIZE = 10;
 const PULL_THRESHOLD = 64;
 
+function cleanText(text = '') {
+  return text
+    .replace(/^el usuario (reporta sentirse|se siente)[^.]*\.\s*(su mensaje:?\s*)?/i, '')
+    .replace(/^"(.+)"$/, '$1')
+    .trim();
+}
+
 export default function Historial() {
   const navigate = useNavigate();
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [generatingPDF, setGeneratingPDF] = useState(false);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [pullY, setPullY] = useState(0);
@@ -56,6 +65,18 @@ export default function Historial() {
     setRefreshing(true);
     await fetchLogs();
     setRefreshing(false);
+  };
+
+  const handleDownloadPDF = async () => {
+    setGeneratingPDF(true);
+    const user = await base44.auth.me().catch(() => null);
+    // Get last 7 days
+    const since = new Date();
+    since.setDate(since.getDate() - 7);
+    const all = await base44.entities.ConflictLog.list('-created_date', 100);
+    const weekly = all.filter(l => new Date(l.created_date) >= since);
+    generateWeeklyPDF(user?.full_name || 'Usuario', weekly.length > 0 ? weekly : all.slice(0, 10));
+    setGeneratingPDF(false);
   };
 
   const loadMore = () => {
@@ -101,14 +122,24 @@ export default function Historial() {
       <div className="flex items-center gap-3 px-5 pt-8 pb-5">
         <button
           onClick={() => navigate('/home')}
-          className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
+          className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors touch-none select-none"
         >
           <ArrowLeft className="w-4 h-4" />
           <span className="text-sm">Volver</span>
         </button>
-        <p className="flex-1 text-center text-sm font-medium text-foreground mr-12">
+        <p className="flex-1 text-center text-sm font-medium text-foreground">
           Historial
         </p>
+        <button
+          onClick={handleDownloadPDF}
+          disabled={generatingPDF || loading}
+          className="flex items-center gap-1 text-muted-foreground hover:text-primary transition-colors disabled:opacity-40 touch-none select-none"
+          title="Descargar informe PDF"
+        >
+          {generatingPDF
+            ? <div className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+            : <FileDown className="w-4 h-4" />}
+        </button>
       </div>
 
       {/* Pull-to-refresh indicator */}
@@ -158,7 +189,7 @@ export default function Historial() {
                   <span className="text-xl shrink-0">{getEmoji(log.cognitive_note)}</span>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm text-foreground truncate">
-                      {log.original_text?.slice(0, 50)}{log.original_text?.length > 50 ? '…' : ''}
+                      {cleanText(log.original_text)?.slice(0, 50)}{(cleanText(log.original_text)?.length || 0) > 50 ? '…' : ''}
                     </p>
                     <p className="text-xs text-muted-foreground mt-0.5">{timeAgo(log.created_date)}</p>
                   </div>

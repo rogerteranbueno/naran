@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Pencil } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import useSpeechInput from '@/hooks/useSpeechInput';
+import { syncPendingLogs } from '@/utils/offlineStorage';
 import OrangeMicButton from '@/components/OrangeMicButton';
 import MicPermissionCard from '@/components/MicPermissionCard';
 import Onboarding from '@/components/Onboarding';
@@ -39,6 +40,14 @@ export default function Home() {
 
   const [showOnboarding, setShowOnboarding] = useState(!localStorage.getItem('naran_onboarded'));
   const [tapMode, setTapMode] = useState(false);
+
+  // Sync offline logs when back online
+  useEffect(() => {
+    const handleOnline = () => syncPendingLogs(base44.entities).catch(() => {});
+    window.addEventListener('online', handleOnline);
+    if (navigator.onLine) handleOnline();
+    return () => window.removeEventListener('online', handleOnline);
+  }, []);
 
   const { transcript, listening, startListening, stopListening, resetTranscript, browserSupported, error: micError } = useSpeechInput();
 
