@@ -36,6 +36,7 @@ import Unirse from '@/pages/Unirse';
 import BibliotecaAuditiva from '@/pages/BibliotecaAuditiva';
 import Admin from '@/pages/Admin';
 import Demo from '@/pages/Demo';
+import ProtectedRoute from '@/components/ProtectedRoute';
 
 
 
@@ -76,21 +77,26 @@ const AuthenticatedApp = () => {
   return (
     <Routes>
       <Route element={<MobileLayout />}>
+        {/* Public routes */}
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<AnimatedRoutes><Welcome /></AnimatedRoutes>} />
-        <Route path="/home" element={<AnimatedRoutes><Home /></AnimatedRoutes>} />
-        <Route path="/app" element={<Navigate to="/home" replace />} />
-        <Route path="/reframe" element={<AnimatedRoutes><Reframe /></AnimatedRoutes>} />
-        <Route path="/log/:id" element={<AnimatedRoutes><LogDetail /></AnimatedRoutes>} />
-        <Route path="/historial" element={<AnimatedRoutes><Historial /></AnimatedRoutes>} />
-        <Route path="/recursos" element={<AnimatedRoutes><Recursos /></AnimatedRoutes>} />
-        <Route path="/profile" element={<AnimatedRoutes><Profile /></AnimatedRoutes>} />
-        <Route path="/practica" element={<AnimatedRoutes><Practica /></AnimatedRoutes>} />
-        <Route path="/espacio" element={<AnimatedRoutes><Espacio /></AnimatedRoutes>} />
-        <Route path="/unirse" element={<AnimatedRoutes><Unirse /></AnimatedRoutes>} />
-        <Route path="/biblioteca-auditiva" element={<AnimatedRoutes><BibliotecaAuditiva /></AnimatedRoutes>} />
-        <Route path="/admin" element={<AnimatedRoutes><Admin /></AnimatedRoutes>} />
         <Route path="/demo" element={<AnimatedRoutes><Demo /></AnimatedRoutes>} />
+        <Route path="/unirse" element={<AnimatedRoutes><Unirse /></AnimatedRoutes>} />
+
+        {/* Protected routes */}
+        <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
+          <Route path="/home" element={<AnimatedRoutes><Home /></AnimatedRoutes>} />
+          <Route path="/app" element={<Navigate to="/home" replace />} />
+          <Route path="/reframe" element={<AnimatedRoutes><Reframe /></AnimatedRoutes>} />
+          <Route path="/log/:id" element={<AnimatedRoutes><LogDetail /></AnimatedRoutes>} />
+          <Route path="/historial" element={<AnimatedRoutes><Historial /></AnimatedRoutes>} />
+          <Route path="/recursos" element={<AnimatedRoutes><Recursos /></AnimatedRoutes>} />
+          <Route path="/profile" element={<AnimatedRoutes><Profile /></AnimatedRoutes>} />
+          <Route path="/practica" element={<AnimatedRoutes><Practica /></AnimatedRoutes>} />
+          <Route path="/espacio" element={<AnimatedRoutes><Espacio /></AnimatedRoutes>} />
+          <Route path="/biblioteca-auditiva" element={<AnimatedRoutes><BibliotecaAuditiva /></AnimatedRoutes>} />
+          <Route path="/admin" element={<AnimatedRoutes><Admin /></AnimatedRoutes>} />
+        </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>
