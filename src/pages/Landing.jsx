@@ -35,11 +35,7 @@ const FEATURES = [
 export default function Landing() {
   const navigate = useNavigate();
 
-  useEffect(() => {
-    base44.auth.isAuthenticated().then((authed) => {
-      if (authed) navigate('/home', { replace: true });
-    });
-  }, [navigate]);
+
 
   const handleLogin = () => base44.auth.redirectToLogin('/home');
   const handleDemo = () => navigate('/demo');
