@@ -9,7 +9,7 @@ import { isDemoMode } from '@/lib/demoMode';
 import OrangeMicButton from '@/components/OrangeMicButton';
 import MicPermissionCard from '@/components/MicPermissionCard';
 import Onboarding from '@/components/Onboarding';
-import StreakCounter from '@/components/StreakCounter';
+import StreakRing from '@/components/StreakRing';
 import TestimonialWall from '@/components/TestimonialWall';
 import HomeTour from '@/components/HomeTour';
 
@@ -40,8 +40,9 @@ export default function Home() {
   const [guardrailMsg, setGuardrailMsg] = useState('');
   const textareaRef = useRef(null);
 
-  const [showOnboarding, setShowOnboarding] = useState(!localStorage.getItem('naran_onboarded'));
-  const [showTour, setShowTour] = useState(!localStorage.getItem('naran_onboarded_v2'));
+  const hasSeenAll = localStorage.getItem('naran_onboarded_v3');
+  const [showOnboarding, setShowOnboarding] = useState(!hasSeenAll);
+  const [showTour, setShowTour] = useState(false);
   const [tapMode, setTapMode] = useState(false);
 
   // Sync offline logs when back online
@@ -60,7 +61,11 @@ export default function Home() {
   }, [transcript]);
 
   if (showOnboarding) {
-    return <Onboarding onDone={() => setShowOnboarding(false)} />;
+    return <Onboarding onDone={() => {
+      localStorage.setItem('naran_onboarded_v3', 'true');
+      setShowOnboarding(false);
+      setShowTour(true);
+    }} />;
   }
 
   const goToReframe = async (inputText) => {
@@ -148,7 +153,7 @@ export default function Home() {
 
       {/* Top bar */}
       <div className="flex items-center justify-center px-5 pt-10 pb-4">
-        <StreakCounter />
+        <StreakRing />
       </div>
 
       {/* Central area */}
