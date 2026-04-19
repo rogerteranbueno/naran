@@ -9,6 +9,7 @@ export default function Unirse() {
   const [status, setStatus] = useState('loading'); // loading | joining | success | error | already
   const [code, setCode] = useState('');
   const [manualCode, setManualCode] = useState('');
+  const [inviterName, setInviterName] = useState('');
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -39,6 +40,11 @@ export default function Unirse() {
     if (!rel) { setStatus('error'); return; }
     if (rel.user1_email === user.email) { setStatus('error'); return; } // no puede unirse a sí mismo
 
+    // Intentar obtener nombre del invitador
+    const allUsers = await base44.entities.User.list('-created_date', 200).catch(() => []);
+    const inviter = allUsers.find(u => u.email === rel.user1_email);
+    if (inviter?.full_name) setInviterName(inviter.full_name);
+
     await base44.entities.Relationship.update(rel.id, { user2_email: user.email, status: 'active' });
     setStatus('success');
     setTimeout(() => navigate('/espacio'), 2000);
@@ -60,11 +66,10 @@ export default function Unirse() {
 
         {status === 'success' && (
           <motion.div initial={{ scale: 0.8 }} animate={{ scale: 1 }} className="space-y-3">
-            <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto">
-              <Check className="w-8 h-8 text-green-600" />
-            </div>
-            <p className="font-semibold text-foreground">¡Conexión exitosa!</p>
-            <p className="text-sm text-muted-foreground">Ahora estáis conectados. Redirigiendo…</p>
+            <div className="text-5xl">🍊❤️🍊</div>
+            <p className="font-semibold text-foreground text-lg">¡Estáis conectados!</p>
+            {inviterName && <p className="text-sm text-muted-foreground">Tú y <strong>{inviterName}</strong> ahora comparten un espacio en Naran.</p>}
+            <p className="text-sm text-muted-foreground">Redirigiendo a vuestro espacio…</p>
           </motion.div>
         )}
 

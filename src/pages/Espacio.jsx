@@ -92,6 +92,12 @@ export default function Espacio() {
     setTimeout(() => setCopied(false), 2500);
   };
 
+  const shareWhatsApp = () => {
+    const url = `${window.location.origin}/unirse?code=${relationship.invite_code}`;
+    const text = encodeURIComponent(`Te invito a Naran, una app para mejorar nuestra comunicación 🍊\nÚnete aquí: ${url}`);
+    window.open(`https://wa.me/?text=${text}`, '_blank');
+  };
+
   if (loading) {
     return (
       <div className="flex-1 flex items-center justify-center">
@@ -142,17 +148,29 @@ export default function Espacio() {
               </div>
               <div>
                 <p className="font-semibold text-foreground text-sm">Esperando a tu pareja…</p>
-                <p className="text-xs text-muted-foreground">Comparte este código o enlace</p>
+                <p className="text-xs text-muted-foreground">Comparte el código o el enlace directo</p>
               </div>
             </div>
-            <div className="rounded-2xl px-4 py-3 text-center" style={{ background: 'rgba(224,122,95,0.08)' }}>
-              <p className="text-2xl font-bold tracking-widest text-primary">{relationship.invite_code}</p>
+            {/* Código grande */}
+            <div className="rounded-2xl px-4 py-4 text-center" style={{ background: 'rgba(224,122,95,0.08)' }}>
+              <p className="text-xs text-muted-foreground mb-1">Código de invitación</p>
+              <p className="text-3xl font-bold tracking-widest text-primary">{relationship.invite_code}</p>
             </div>
-            <button onClick={copyLink}
-              className="w-full h-11 rounded-2xl flex items-center justify-center gap-2 text-sm font-medium border border-border/40 transition-colors hover:bg-secondary/40">
-              {copied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4 text-muted-foreground" />}
-              {copied ? 'Enlace copiado' : 'Copiar enlace de invitación'}
-            </button>
+            {/* Botones de compartir */}
+            <div className="flex gap-2">
+              <button onClick={copyLink}
+                className="flex-1 h-11 rounded-2xl flex items-center justify-center gap-2 text-sm font-medium border border-border/40 transition-colors hover:bg-secondary/40">
+                {copied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4 text-muted-foreground" />}
+                {copied ? 'Copiado' : 'Copiar enlace'}
+              </button>
+              <button onClick={shareWhatsApp}
+                className="flex-1 h-11 rounded-2xl flex items-center justify-center gap-2 text-sm font-medium text-white"
+                style={{ background: '#25D366' }}>
+                <span className="text-base">💬</span>
+                WhatsApp
+              </button>
+            </div>
+            <p className="text-center text-xs text-muted-foreground">Tu pareja debe abrir el enlace y aceptar la invitación</p>
           </motion.div>
         )}
 

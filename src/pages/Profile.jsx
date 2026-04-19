@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, LogOut, BookOpen, Clock, Trash2, Pencil, Check, X, Bell, BellOff } from 'lucide-react';
+import { ArrowLeft, LogOut, BookOpen, Clock, Trash2, Pencil, Check, X, Bell, BellOff, Heart, Users } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import BadgesSection from '@/components/BadgesSection';
@@ -15,6 +15,8 @@ export default function Profile() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState('');
   const [deleting, setDeleting] = useState(false);
+  const [relationship, setRelationship] = useState(null);
+  const [loadingRel, setLoadingRel] = useState(true);
 
   // Editable profile state
   const [editingGoal, setEditingGoal] = useState(false);
@@ -27,12 +29,17 @@ export default function Profile() {
   const [streak, setStreak] = useState(0);
 
   useEffect(() => {
-    base44.auth.me().then(u => {
+    base44.auth.me().then(async u => {
       setUser(u);
       setAvatar(u?.avatar || '🍊');
       setWeeklyGoal(u?.weekly_goal || '');
       setPildorasEnabled(u?.pildoras_enabled || false);
-    }).catch(() => {});
+      // Load relationship
+      const rels = await base44.entities.Relationship.list('-created_date', 20).catch(() => []);
+      const mine = rels.find(r => r.user1_email === u.email || r.user2_email === u.email);
+      setRelationship(mine || null);
+      setLoadingRel(false);
+    }).catch(() => setLoadingRel(false));
     const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
     base44.entities.ConflictLog.list('-created_date', 100).then(logs => {
       setAllLogs(logs);
@@ -199,6 +206,60 @@ export default function Profile() {
           transition={{ delay: 0.14 }}
         >
           <BadgesSection logs={allLogs} streak={streak} />
+        </motion.div>
+
+        {/* Sección de pareja */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.16 }}
+        >
+          {!loadingRel && !relationship && (
+            <button
+              onClick={() => navigate('/espacio')}
+              className="w-full flex items-center gap-4 bg-white rounded-3xl px-5 py-4 shadow-sm border border-border/40 text-left hover:bg-secondary/30 transition-colors"
+            >
+              <div className="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0"
+                style={{ background: 'rgba(224,122,95,0.10)' }}>
+                <Heart className="w-5 h-5 text-primary" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-foreground">Conecta con tu pareja</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Ver métricas compartidas juntos</p>
+              </div>
+              <span className="text-xs text-primary font-medium">Invitar →</span>
+            </button>
+          )}
+          {!loadingRel && relationship?.status === 'pending' && (
+            <button
+              onClick={() => navigate('/espacio')}
+              className="w-full flex items-center gap-4 bg-white rounded-3xl px-5 py-4 shadow-sm border border-border/40 text-left hover:bg-secondary/30 transition-colors"
+            >
+              <div className="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0"
+                style={{ background: 'rgba(251,191,36,0.12)' }}>
+                <Users className="w-5 h-5 text-yellow-600" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-foreground">Invitación enviada</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Esperando que tu pareja acepte</p>
+              </div>
+              <span className="text-xs text-muted-foreground">⏳</span>
+            </button>
+          )}
+          {!loadingRel && relationship?.status === 'active' && (
+            <button
+              onClick={() => navigate('/espacio')}
+              className="w-full flex items-center gap-4 bg-white rounded-3xl px-5 py-4 shadow-sm border border-primary/20 text-left hover:bg-secondary/30 transition-colors"
+              style={{ background: 'rgba(224,122,95,0.04)' }}
+            >
+              <div className="text-2xl">🍊❤️🍊</div>
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-foreground">Pareja vinculada</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Ver vuestro espacio compartido</p>
+              </div>
+              <span className="text-xs text-primary font-medium">Ver →</span>
+            </button>
+          )}
         </motion.div>
 
         {/* Píldoras de Calma toggle */}
