@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { motion } from 'framer-motion';
@@ -22,8 +21,8 @@ export default function Welcome() {
 
   if (checking) {
     return (
-      <div className="flex-1 flex items-center justify-center">
-        <div className="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+      <div className="flex-1 flex items-center justify-center" style={{ background: '#FDFBF7' }}>
+        <div className="w-6 h-6 rounded-full animate-spin" style={{ border: '2px solid rgba(224,122,95,0.3)', borderTopColor: '#E07A5F' }} />
       </div>
     );
   }
@@ -49,10 +48,10 @@ export default function Welcome() {
           </div>
         </div>
 
-        <h1 className="text-4xl font-semibold tracking-tight text-foreground mb-3 lowercase">
+        <h1 className="text-4xl font-semibold tracking-tight mb-3 lowercase" style={{ color: '#1A1A1A' }}>
           naran
         </h1>
-        <p className="text-muted-foreground text-base leading-relaxed max-w-[260px]">
+        <p className="text-base leading-relaxed max-w-[260px]" style={{ color: '#6B6560' }}>
           Transforma tus reacciones en conexión. Una pausa inteligente para tu relación.
         </p>
       </motion.div>
@@ -64,13 +63,14 @@ export default function Welcome() {
         transition={{ duration: 0.6, delay: 0.3 }}
         className="space-y-3"
       >
-        <Button
+        <button
           onClick={handleLogin}
-          className="w-full h-14 rounded-2xl text-base font-medium gap-2 bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20"
+          className="w-full h-14 rounded-2xl text-base font-medium flex items-center justify-center gap-2 text-white transition-all active:scale-95"
+          style={{ background: '#E07A5F', boxShadow: '0 8px 24px rgba(224,122,95,0.35)' }}
         >
           Comenzar
           <ArrowRight className="w-4 h-4" />
-        </Button>
+        </button>
 
         <button
           onClick={handleDemo}
@@ -80,7 +80,7 @@ export default function Welcome() {
           Probar Naran sin registro
         </button>
 
-        <p className="text-center text-xs text-muted-foreground/70 pt-1">
+        <p className="text-center text-xs pt-1" style={{ color: '#A89F97' }}>
           Al continuar aceptas nuestros términos de uso y privacidad.
         </p>
       </motion.div>
