@@ -37,6 +37,7 @@ import BibliotecaAuditiva from '@/pages/BibliotecaAuditiva';
 import Admin from '@/pages/Admin';
 import Demo from '@/pages/Demo';
 import ProtectedRoute from '@/components/ProtectedRoute';
+import Landing from '@/pages/Landing';
 
 
 
@@ -78,7 +79,7 @@ const AuthenticatedApp = () => {
     <Routes>
       <Route element={<MobileLayout />}>
         {/* Public routes */}
-        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="/" element={<Landing />} />
         <Route path="/login" element={<AnimatedRoutes><Welcome /></AnimatedRoutes>} />
         <Route path="/demo" element={<AnimatedRoutes><Demo /></AnimatedRoutes>} />
         <Route path="/unirse" element={<AnimatedRoutes><Unirse /></AnimatedRoutes>} />
