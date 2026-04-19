@@ -6,14 +6,12 @@ import { base44 } from '@/api/base44Client';
 import useSpeechInput from '@/hooks/useSpeechInput';
 import { syncPendingLogs } from '@/utils/offlineStorage';
 import { isDemoMode } from '@/lib/demoMode';
-import DemoBanner from '@/components/DemoBanner';
 import OrangeMicButton from '@/components/OrangeMicButton';
 import MicPermissionCard from '@/components/MicPermissionCard';
 import Onboarding from '@/components/Onboarding';
 import StreakCounter from '@/components/StreakCounter';
 import TestimonialWall from '@/components/TestimonialWall';
 import HomeTour from '@/components/HomeTour';
-import DemoBottomSheet from '@/components/DemoBottomSheet';
 
 const AGGRESSIVE_RE = /\b(eres\s+un[a]?\s+\w+)\b/i;
 
@@ -43,8 +41,7 @@ export default function Home() {
   const textareaRef = useRef(null);
 
   const [showOnboarding, setShowOnboarding] = useState(!localStorage.getItem('naran_onboarded'));
-  const [showTour, setShowTour] = useState(!localStorage.getItem('naran_onboarded_v2') && !!localStorage.getItem('naran_onboarded'));
-  const [showDemoSheet, setShowDemoSheet] = useState(false);
+  const [showTour, setShowTour] = useState(!localStorage.getItem('naran_onboarded_v2'));
   const [tapMode, setTapMode] = useState(false);
 
   // Sync offline logs when back online
@@ -79,10 +76,9 @@ export default function Home() {
     setAnalyzing(true);
     const result = await analyzeText(trimmed);
 
-    // Show demo bottom sheet after first reframe in demo mode
+    // Mark first demo reframe so /reframe page can show the sheet
     if (isDemoMode() && !localStorage.getItem('naran_demo_sheet_shown')) {
       localStorage.setItem('naran_demo_sheet_shown', '1');
-      setShowDemoSheet(true);
     }
 
     navigate('/reframe', {
@@ -283,7 +279,6 @@ export default function Home() {
         </AnimatePresence>
       </div>
       {showTour && <HomeTour onDone={() => setShowTour(false)} />}
-      {isDemoMode() && <DemoBottomSheet visible={showDemoSheet} onDismiss={() => setShowDemoSheet(false)} />}
     </div>
   );
 }

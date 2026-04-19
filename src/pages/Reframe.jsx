@@ -8,6 +8,7 @@ import { humanizeDiagnosis } from '@/lib/humanizeDiagnosis';
 import TestimonialPrompt from '@/components/TestimonialPrompt';
 import { saveLogOffline } from '@/utils/offlineStorage';
 import { isDemoMode } from '@/lib/demoMode';
+import DemoBottomSheet from '@/components/DemoBottomSheet';
 
 const GOTTMAN_TIPS = {
   'crítica': 'Inicio suave: habla de TU sentimiento, no del defecto del otro.',
@@ -53,6 +54,10 @@ export default function Reframe() {
   const [toast, setToast] = useState(null);
   const [humanizedDiagnosis, setHumanizedDiagnosis] = useState(null);
   const [loadingDiagnosis, setLoadingDiagnosis] = useState(false);
+  // Show demo sheet once after first reframe
+  const [showDemoSheet, setShowDemoSheet] = useState(
+    isDemoMode() && localStorage.getItem('naran_demo_sheet_shown') === '1'
+  );
 
   // Limpiar cualquier prefijo que el prompt interno haya colado en original_text
   const rawText = state?.original_text || '';
@@ -255,6 +260,15 @@ export default function Reframe() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Demo bottom sheet — shown once after first reframe */}
+      <DemoBottomSheet
+        visible={showDemoSheet}
+        onDismiss={() => {
+          localStorage.removeItem('naran_demo_sheet_shown');
+          setShowDemoSheet(false);
+        }}
+      />
     </div>
   );
 }
