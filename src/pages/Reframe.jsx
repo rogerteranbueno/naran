@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { BookmarkPlus, Share2, Check } from 'lucide-react';
+import { BookmarkPlus, Share2, Check, FileDown } from 'lucide-react';
+import { jsPDF } from 'jspdf';
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
@@ -126,6 +127,91 @@ export default function Reframe() {
 
   const handleDone = () => navigate('/home');
 
+  const handleExportPDF = () => {
+    const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+    const orange = [224, 122, 95];
+    const dark = [44, 44, 44];
+    const gray = [120, 113, 108];
+    const cream = [253, 251, 247];
+
+    // Background
+    doc.setFillColor(...cream);
+    doc.rect(0, 0, 210, 297, 'F');
+
+    // Header bar
+    doc.setFillColor(...orange);
+    doc.rect(0, 0, 210, 18, 'F');
+    doc.setFontSize(13);
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    doc.text('🍊 naran — Reencuadre de mensaje', 14, 12);
+
+    let y = 30;
+
+    // Date
+    doc.setFontSize(8);
+    doc.setTextColor(...gray);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Generado el ${new Date().toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' })}`, 14, y);
+    y += 10;
+
+    // Section: original
+    if (originalText) {
+      doc.setFontSize(8);
+      doc.setTextColor(...orange);
+      doc.setFont('helvetica', 'bold');
+      doc.text('LO QUE IBAS A DECIR', 14, y);
+      y += 5;
+      doc.setFontSize(10);
+      doc.setTextColor(...gray);
+      doc.setFont('helvetica', 'normalitalic');
+      const origLines = doc.splitTextToSize(`"${originalText}"`, 182);
+      doc.text(origLines, 14, y);
+      y += origLines.length * 5 + 8;
+    }
+
+    // Section: diagnosis
+    if (humanizedDiagnosis || cognitiveNote) {
+      doc.setFontSize(8);
+      doc.setTextColor(...orange);
+      doc.setFont('helvetica', 'bold');
+      doc.text('LO QUE HAY DETRÁS', 14, y);
+      y += 5;
+      doc.setFontSize(10);
+      doc.setTextColor(...dark);
+      doc.setFont('helvetica', 'normal');
+      const diagLines = doc.splitTextToSize(humanizedDiagnosis || cognitiveNote, 182);
+      doc.text(diagLines, 14, y);
+      y += diagLines.length * 5 + 8;
+    }
+
+    // Section: reframe (highlighted box)
+    doc.setFontSize(8);
+    doc.setTextColor(...orange);
+    doc.setFont('helvetica', 'bold');
+    doc.text('NARAN SUGIERE', 14, y);
+    y += 5;
+    const reframeLines = doc.splitTextToSize(reframeMessage, 174);
+    const boxH = reframeLines.length * 6 + 12;
+    doc.setFillColor(253, 242, 238);
+    doc.setDrawColor(...orange);
+    doc.setLineWidth(0.5);
+    doc.roundedRect(14, y, 182, boxH, 4, 4, 'FD');
+    doc.setFontSize(11);
+    doc.setTextColor(...dark);
+    doc.setFont('helvetica', 'normal');
+    doc.text(reframeLines, 21, y + 8);
+    y += boxH + 10;
+
+    // Footer
+    doc.setFontSize(8);
+    doc.setTextColor(...gray);
+    doc.text('naran.app · Comunicación No Violenta & Método Gottman', 14, 287);
+
+    doc.save(`naran-reframe-${Date.now()}.pdf`);
+    showToast('PDF descargado ✓');
+  };
+
   return (
     <div className="flex-1 flex flex-col"
       style={{ background: 'radial-gradient(ellipse at 50% 0%, rgba(224,122,95,0.10) 0%, #FDFBF7 65%)' }}>
@@ -237,6 +323,12 @@ export default function Reframe() {
             icon={<Share2 className="w-5 h-5" />}
             label="Compartir"
             onClick={handleShare}
+          />
+          {/* Export PDF */}
+          <ToolbarButton
+            icon={<FileDown className="w-5 h-5" />}
+            label="Exportar PDF"
+            onClick={handleExportPDF}
           />
           {/* Done — solo usar el mensaje, sin guardar */}
           <ToolbarButton
