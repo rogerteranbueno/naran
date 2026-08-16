@@ -30,5 +30,10 @@
       },
       "description": "IDs de audios favoritos del usuario en la Biblioteca Auditiva"
     }
-  }
+  },
+  "required": [
+    "avatar",
+    "weekly_goal",
+    "favorite_audios"
+  ]
 }
